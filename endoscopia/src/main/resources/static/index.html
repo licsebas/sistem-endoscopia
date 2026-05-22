@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión Integral - Clínica Endoscopia</title>
+    <style>
+        /* ================= ESTILOS GENERALES ================= */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f4f7f6; height: 100vh; display: flex; flex-direction: column; }
+        #login-screen { display: flex; justify-content: center; align-items: center; height: 100vh; background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); }
+        .login-card { background-color: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; max-width: 380px; text-align: center; }
+        .login-card h2 { margin-top: 0; color: #2c3e50; }
+        .login-card input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        #dashboard-screen { display: none; height: 100vh; flex-direction: row; overflow: hidden; }
+        .sidebar { width: 260px; background-color: #2c3e50; color: white; padding: 20px; display: flex; flex-direction: column; flex-shrink: 0; }
+        .sidebar h2 { text-align: center; border-bottom: 2px solid #1abc9c; padding-bottom: 15px; font-size: 20px; margin-bottom: 20px;}
+        .menu-btn { background: none; color: white; border: none; padding: 15px; text-align: left; font-size: 15px; cursor: pointer; border-radius: 8px; transition: 0.3s; margin-top: 5px; display: flex; align-items: center;}
+        .menu-btn:hover, .menu-btn.active { background-color: #1abc9c; }
+        .content { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; background-color: #f8fafc;}
+        .top-header { background-color: #ffffff; padding: 15px 25px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: flex-end; align-items: center; border-bottom: 1px solid #e2e8f0; }
+        .user-badge { background-color: #3498db; color: white; padding: 8px 18px; border-radius: 30px; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.2s; }
+        .user-badge:hover { background-color: #2980b9; transform: scale(1.05); }
+        .pantallas-container { padding: 25px; }
+        .pantalla { display: none; }
+        .pantalla.active { display: block; }
+        .card { background-color: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #edf2f7; }
+        .form-section { border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; margin-bottom: 20px; background-color: #fcfcfc;}
+        .form-group { margin-bottom: 15px; }
+        label { font-weight: 600; display: block; margin-bottom: 8px; color: #4a5568; font-size: 14px;}
+        select, input, textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; box-sizing: border-box; font-family: inherit;}
+        .btn-submit { background-color: #3182ce; color: white; border: none; padding: 12px; font-size: 14px; cursor: pointer; border-radius: 6px; width: 100%; margin-top: 10px; font-weight: bold; transition: 0.2s;}
+        .btn-submit:hover { opacity: 0.9; }
+        .btn-danger { background-color: #e53e3e; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .btn-warning { background-color: #d69e2e; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .btn-success { background-color: #38a169; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .btn-info { background-color: #3182ce; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; min-width: 600px; }
+        table th { background-color: #edf2f7; color: #4a5568; text-align: left; padding: 12px; border: 1px solid #e2e8f0; font-size: 13px; text-transform: uppercase; }
+        table td { padding: 12px; border: 1px solid #e2e8f0; font-size: 14px; color: #2d3748; }
+
+        .grid-2-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .grid-3-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+        .grid-4-col { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 15px; }
+        .required::after { content: " *"; color: red; }
+        .equipo-box { background: #ebf8ff; padding: 15px; border-radius: 10px; border: 1px solid #bee3f8; }
+        .filtros-box { background: #f7fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 15px; display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;}
+        .pantalla-exito { display: none; text-align: center; padding: 40px; background-color: #f0fff4; border: 2px dashed #48bb78; border-radius: 12px; }
+
+        .panel-auditoria { background: #fffaf0; border: 2px solid #dd6b20; border-radius: 8px; padding: 15px; margin-bottom: 20px; display: none; }
+        .panel-auditoria h4 { margin: 0 0 10px 0; color: #dd6b20; }
+        .audit-indicador { padding: 10px; border-radius: 6px; font-weight: bold; font-size: 14px; margin-bottom: 5px; }
+
+        /* MODALES */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: #fff; width: 90%; max-width: 800px; max-height: 90vh; border-radius: 12px; padding: 25px; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .ficha-header { display: flex; justify-content: space-between; border-bottom: 2px solid #2b6cb0; padding-bottom: 15px; margin-bottom: 20px; align-items: center; flex-wrap: wrap; gap: 10px;}
+        .ficha-title { color: #2b6cb0; margin: 0; font-size: 22px; }
+        .btn-close { background: #e53e3e; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+
+        @media (max-width: 768px) {
+            #dashboard-screen { flex-direction: column; overflow-y: auto; }
+            .sidebar { width: 100%; flex-direction: row; padding: 10px; overflow-x: auto; white-space: nowrap; }
+            .sidebar h2 { display: none; }
+            .menu-btn { font-size: 14px; padding: 10px; margin: 0 5px 0 0; flex-shrink: 0; }
+            .content { overflow-y: visible; }
+            .pantallas-container { padding: 10px; }
+            .card { padding: 15px; }
+            .grid-2-col, .grid-3-col, .grid-4-col { grid-template-columns: 1fr; gap: 10px; }
+            .filtros-box { flex-direction: column; align-items: stretch; }
+            .filtros-box > div { width: 100%; }
+            .filtros-box .btn-submit { width: 100%; margin-top: 5px; }
+            .pantalla > div > .btn-submit { width: 100% !important; margin-bottom: 5px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="login-screen">
+    <div class="login-card">
+        <h2>Clínica Endoscopia</h2>
+        <p style="color: #718096; margin-bottom: 25px;">Gestión Integral de Salud</p>
+        <input type="text" id="username" placeholder="Usuario">
+        <input type="password" id="password" placeholder="Contraseña">
+        <button class="btn-submit" onclick="iniciarSesion()">INGRESAR</button>
+    </div>
+</div>
+
+<div id="dashboard-screen">
+    <div class="sidebar">
+        <h2>SISTEMA</h2>
+        <button id="btn-control" class="menu-btn active" onclick="cambiarPantalla('pantalla-control', 'btn-control')">✅ Control Sala</button>
+        <button id="btn-inventario" class="menu-btn" onclick="cambiarPantalla('pantalla-inventario', 'btn-inventario')">📦 Inventario</button>
+        <button id="btn-oxigeno" class="menu-btn" onclick="cambiarPantalla('pantalla-oxigeno', 'btn-oxigeno')">💨 Gases Médicos</button>
+        <button id="btn-usuarios" class="menu-btn" style="display:none;" onclick="cambiarPantalla('pantalla-usuarios', 'btn-usuarios')">🔐 Usuarios</button>
+        <div style="flex-grow: 1;"></div>
+        <button class="menu-btn" style="background-color: #e53e3e;" onclick="location.reload()">Cerrar Sesión</button>
+    </div>
+
+    <div class="content">
+        <div class="top-header">
+            <div class="user-badge" id="display-user" onclick="abrirMiPerfil()" title="Haga clic para editar sus datos">No identificado</div>
+        </div>
+
+        <div class="pantallas-container">
+            <div id="pantalla-usuarios" class="pantalla">
+                <div id="vista-form-usuarios" class="card">
+                    <h3 style="color: #2b6cb0; margin-top: 0;">Administración de Personal</h3>
+                    <div id="seccion-alta-usuario" class="form-section">
+                        <h4 style="margin-top: 0;">➕ Registrar Nuevo Usuario</h4>
+                        <div class="grid-3-col">
+                            <div class="form-group"><label class="required">Nombre:</label><input type="text" id="nuevo-nombre"></div>
+                            <div class="form-group"><label class="required">Apellido:</label><input type="text" id="nuevo-apellido"></div>
+                            <div class="form-group"><label class="required">DNI:</label><input type="text" id="nuevo-dni"></div>
+                        </div>
+                        <div class="grid-3-col">
+                            <div class="form-group"><label class="required">Sexo:</label>
+                                <select id="nuevo-sexo"><option value="Femenino">Femenino</option><option value="Masculino">Masculino</option><option value="Otro">Otro</option></select>
+                            </div>
+                            <div class="form-group"><label class="required">Teléfono:</label><input type="text" id="nuevo-telefono"></div>
+                            <div class="form-group"><label class="required">Nacimiento:</label><input type="date" id="nuevo-nacimiento"></div>
+                        </div>
+                        <div class="grid-3-col">
+                            <div class="form-group"><label class="required">País:</label><input type="text" id="nuevo-pais" value="Argentina"></div>
+                            <div class="form-group"><label class="required">Provincia:</label><input type="text" id="nuevo-provincia" value="Tucumán"></div>
+                            <div class="form-group"><label class="required">Ciudad:</label><input type="text" id="nuevo-ciudad"></div>
+                        </div>
+                        <div class="grid-2-col">
+                            <div class="form-group"><label class="required">Email:</label><input type="email" id="nuevo-email"></div>
+                            <div class="form-group"><label>Dirección:</label><input type="text" id="nuevo-direccion"></div>
+                        </div>
+                        <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;">
+                        <div class="grid-3-col">
+                            <div class="form-group"><label class="required">Usuario (Login):</label><input type="text" id="nuevo-user"></div>
+                            <div class="form-group"><label class="required">Clave:</label><input type="password" id="nuevo-pass"></div>
+                            <div class="form-group"><label class="required">Rol:</label>
+                                <select id="nuevo-rol">
+                                    <option value="Técnica">Técnica</option>
+                                    <option value="Administrativa">Administrativa</option>
+                                    <option value="Administrador">Administrador</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button class="btn-submit" style="background-color: #2b6cb0;" onclick="guardarNuevoUsuario()">Registrar Empleado</button>
+                    </div>
+
+                    <div id="vista-editar-usuario" class="form-section" style="display: none; border-color: #ed8936; background-color: #fffaf0;">
+                        <h4 style="color: #c05621;">✏️ Modificar Legajo</h4>
+                        <input type="hidden" id="edit-user-id">
+                        <div class="grid-3-col">
+                            <div class="form-group"><label class="required">Nombre:</label><input type="text" id="edit-nombre"></div>
+                            <div class="form-group"><label class="required">Apellido:</label><input type="text" id="edit-apellido"></div>
+                            <div class="form-group"><label class="required">DNI:</label><input type="text" id="edit-dni"></div>
+                        </div>
+                        <div class="grid-3-col">
+                            <div class="form-group"><label class="required">Sexo:</label>
+                                <select id="edit-sexo"><option value="Femenino">Femenino</option><option value="Masculino">Masculino</option><option value="Otro">Otro</option></select>
+                            </div>
+                            <div class="form-group"><label class="required">Teléfono:</label><input type="text" id="edit-telefono"></div>
+                            <div class="form-group"><label class="required">Nacimiento:</label><input type="date" id="edit-nacimiento"></div>
+                        </div>
+                        <div class="grid-3-col">
+                            <div class="form-group"><label class="required">País:</label><input type="text" id="edit-pais"></div>
+                            <div class="form-group"><label class="required">Provincia:</label><input type="text" id="edit-provincia"></div>
+                            <div class="form-group"><label class="required">Ciudad:</label><input type="text" id="edit-ciudad"></div>
+                        </div>
+                        <div class="grid-2-col">
+                            <div class="form-group"><label class="required">Email:</label><input type="email" id="edit-email"></div>
+                            <div class="form-group"><label>Dirección:</label><input type="text" id="edit-direccion"></div>
+                        </div>
+                        <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;">
+                        <div class="grid-2-col">
+                            <div class="form-group"><label class="required">Usuario (Login):</label><input type="text" id="edit-user-name"></div>
+                            <div class="form-group"><label class="required">Rol:</label>
+                                <select id="edit-user-rol">
+                                    <option value="Técnica">Técnica</option>
+                                    <option value="Administrativa">Administrativa</option>
+                                    <option value="Administrador">Administrador</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid-2-col">
+                            <button class="btn-submit" style="background-color: #ed8936;" onclick="guardarEdicionUsuario()">Guardar Cambios</button>
+                            <button class="btn-submit" style="background-color: #a0aec0;" onclick="cancelarEdicionUsuario()">Cancelar</button>
+                        </div>
+                    </div>
+
+                    <h4>Personal Registrado</h4>
+                    <div class="table-responsive">
+                        <table>
+                            <thead><tr style="background:#2b6cb0; color:white;"><th>Nombre Completo</th><th>Usuario</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr></thead>
+                            <tbody id="tabla-usuarios-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="pantalla-control" class="pantalla active">
+                <div style="margin-bottom:20px; display:flex; gap:10px; flex-wrap:wrap;">
+                    <button id="btn-ctrl-alta" class="btn-submit" style="display:none; width:auto; background:#2d3748;" onclick="mostrarSubCtrl('sub-alta-equipo')">➕ Alta Equipo</button>
+                    <button class="btn-submit" style="width:auto; background:#3182ce;" onclick="mostrarSubCtrl('sub-form')">📝 Nueva Planilla</button>
+                    <button class="btn-submit" style="width:auto; background:#38a169;" onclick="mostrarSubCtrl('sub-historial'); cargarHistorial();">📜 Historial y Auditoría</button>
+                    <button id="btn-reparaciones" class="btn-submit" style="display:none; width:auto; background:#4a5568;" onclick="mostrarSubCtrl('sub-equipos'); dibujarEquipos();">⚙️ Gestión de Equipos</button>
+                </div>
+
+                <div id="sub-alta-equipo" class="card" style="display:none;">
+                    <h3 style="color:#2d3748; border-bottom:2px solid #2d3748; padding-bottom:5px;">➕ Registrar Nuevo Endoscopio</h3>
+                    <div class="grid-3-col">
+                        <div class="form-group"><label class="required">Tipo de Equipo:</label>
+                            <select id="eq-tipo"><option value="Gastroscopio">Gastroscopio</option><option value="Colonoscopio">Colonoscopio</option></select>
+                        </div>
+                        <div class="form-group"><label class="required">Modelo:</label><input type="text" id="eq-alias" placeholder="Ej: G-180 o CF-150"></div>
+                        <div class="form-group"><label class="required">N° de Serie:</label><input type="text" id="eq-serie" placeholder="N° Serie"></div>
+                    </div>
+                    <button class="btn-submit" onclick="funcionAltaEquipo()" style="background-color:#2d3748; width:auto; padding:10px 20px;">💾 Guardar Equipo</button>
+                </div>
+
+                <div id="sub-form" class="card" style="display:block;">
+                    <h3 style="color:#3182ce; border-bottom:2px solid #3182ce; padding-bottom:10px;">✅ Checklist Pre-Turno</h3>
+
+                    <h4>1. Infraestructura y Sala</h4>
+                    <div class="grid-4-col" style="background:#f7fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:20px;">
+                        <div><label>PC:</label><select id="chk-pc"><option value="ok">🟢 OK</option><option value="obs">🔴 Falla</option></select></div>
+                        <div><label>Impresora:</label><select id="chk-imp"><option value="ok">🟢 OK</option><option value="obs">🔴 Falla</option></select></div>
+                        <div><label>Líquido:</label><select id="chk-liq"><option value="ok">🟢 OK</option><option value="obs">🔴 Falta</option></select></div>
+                        <div><label>Lavadora:</label><select id="chk-lav"><option value="ok">🟢 OK</option><option value="obs">🔴 Falla</option></select></div>
+                        <div><label>Oxígeno:</label><select id="chk-o2"><option value="ok">🟢 OK</option><option value="obs">🟡 Obs.</option></select></div>
+                        <div><label>CO2:</label><select id="chk-co2"><option value="ok">🟢 OK</option><option value="obs">🟡 Obs.</option></select></div>
+                        <div style="grid-column: span 2;"><label>Frascos Biopsia:</label><input type="number" id="chk-frascos" value="0"></div>
+                    </div>
+                    <label>Observaciones de Sala:</label>
+                    <textarea id="chk-obs-sala" rows="2" placeholder="Reporte anomalías edilicias..."></textarea>
+
+                    <h4 style="margin-top:25px;">2. Control Físico de Endoscopios</h4>
+                    <div class="grid-2-col">
+                        <div class="equipo-box">
+                            <label style="color:#2c5282;">🏥 GASTROSCOPIO:</label>
+                            <select id="sel-gastro" style="margin-bottom:10px; border:2px solid #3182ce;"></select>
+                            <div class="grid-2-col">
+                                <div><label>Luz:</label><select id="gastro-luz"><option value="ok">🟢 OK</option><option value="falla">🔴 Falla</option></select></div>
+                                <div><label>Movs:</label><select id="gastro-mov"><option value="ok">🟢 OK</option><option value="falla">🔴 Falla</option></select></div>
+                                <div><label>Fuga:</label><select id="gastro-fuga"><option value="ok">🟢 Negativa</option><option value="falla">🔴 Positiva</option></select></div>
+                                <div><label>Canal:</label><select id="gastro-canal"><option value="ok">🟢 OK</option><option value="falla">🔴 Falla</option></select></div>
+                            </div>
+                            <textarea id="gastro-obs" rows="3" placeholder="📝 Escribir una observación o falla del Gastroscopio..." style="margin-top:10px; border-color:#2b6cb0; width:100%;"></textarea>
+                        </div>
+
+                        <div class="equipo-box" style="background:#f0fff4; border-color:#c6f6d5;">
+                            <label style="color:#22543d;">🏥 COLONOSCOPIO:</label>
+                            <select id="sel-colono" style="margin-bottom:10px; border:2px solid #38a169;"></select>
+                            <div class="grid-2-col">
+                                <div><label>Luz:</label><select id="colono-luz"><option value="ok">🟢 OK</option><option value="falla">🔴 Falla</option></select></div>
+                                <div><label>Movs:</label><select id="colono-mov"><option value="ok">🟢 OK</option><option value="falla">🔴 Falla</option></select></div>
+                                <div><label>Fuga:</label><select id="colono-fuga"><option value="ok">🟢 Negativa</option><option value="falla">🔴 Positiva</option></select></div>
+                                <div><label>Canal:</label><select id="colono-canal"><option value="ok">🟢 OK</option><option value="falla">🔴 Falla</option></select></div>
+                            </div>
+                            <textarea id="colono-obs" rows="3" placeholder="📝 Escribir una observación o falla del Colonoscopio..." style="margin-top:10px; border-color:#2f855a; width:100%;"></textarea>
+                        </div>
+                    </div>
+                    <button id="btn-guardar-control" class="btn-submit" style="margin-top:30px; background:#3182ce; padding:15px;" onclick="guardarTodoElControl()">✔️ FIRMAR Y GUARDAR CONTROL DIARIO</button>
+                </div>
+
+                <div id="sub-historial" class="card" style="display:none;">
+                    <div id="panel-auditoria-turnos" class="panel-auditoria">
+                        <h4>⚠️ Auditoría de Personal (Día de Hoy)</h4>
+                        <div id="audit-contenido">Buscando datos...</div>
+                    </div>
+                    <h3>📜 Historial Diario</h3>
+                    <div class="filtros-box">
+                        <div><label>Desde:</label><input type="date" id="f-desde"></div>
+                        <div><label>Hasta:</label><input type="date" id="f-hasta"></div>
+                        <button class="btn-submit" style="width:auto; background:#3182ce;" onclick="cargarHistorial()">🔍 Filtrar</button>
+                    </div>
+                    <div id="tabla-historial" class="table-responsive"></div>
+                </div>
+
+                <div id="sub-equipos" class="card" style="display:none;">
+                    <h3>🛠️ Mantenimiento y Gestión de Equipos</h3>
+                    <div id="lista-equipos" class="table-responsive"></div>
+                </div>
+            </div>
+
+            <div id="pantalla-inventario" class="pantalla">
+                <div style="margin-bottom: 25px; display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button id="btn-inv-alta" class="btn-submit" style="display:none; margin-top:0; width: auto; background-color: #2d3748; font-size: 12px; padding: 8px;" onclick="mostrarSubInv('sub-alta')">1. Listado de Insumos (Catálogo)</button>
+                    <button class="btn-submit" style="margin-top:0; width: auto; background-color: #38b2ac; font-size: 12px; padding: 8px;" onclick="mostrarSubInv('sub-ingreso')">2. Ingresos (Remitos)</button>
+                    <button class="btn-submit" style="margin-top:0; width: auto; background-color: #e53e3e; font-size: 12px; padding: 8px;" onclick="mostrarSubInv('sub-consumo')">3. Bajas (Consumo)</button>
+                    <button class="btn-submit" style="margin-top:0; width: auto; background-color: #d69e2e; font-size: 12px; padding: 8px;" onclick="mostrarSubInv('sub-stock'); cargarInsumos();">4. Stock Actual</button>
+                    <button class="btn-submit" style="margin-top:0; width: auto; background-color: #805ad5; font-size: 12px; padding: 8px;" onclick="mostrarSubInv('sub-ingresos-periodo')">5. Reportes</button>
+                </div>
+
+                <div id="sub-alta" class="card sub-inv" style="display:none;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #2d3748; padding-bottom:10px; margin-bottom:20px; flex-wrap: wrap; gap:10px;">
+                        <h3 style="margin:0; color:#2d3748;">📋 Catálogo Maestro de Insumos</h3>
+                        <button class="btn-submit" style="width:auto; background-color: #2d3748; margin:0;" onclick="document.getElementById('panel-nuevo-insumo').style.display='block'">➕ Agregar Nuevo</button>
+                    </div>
+
+                    <div id="panel-nuevo-insumo" style="display:none; background:#f7fafc; padding:15px; border:1px solid #e2e8f0; border-radius:8px; margin-bottom:20px;">
+                        <h4 style="margin-top:0; color:#2b6cb0;">Registrar Nuevo Elemento</h4>
+                        <div class="grid-3-col" style="align-items:end;">
+                            <div class="form-group"><label>Nombre Insumo:</label><input type="text" id="alta-nombre"></div>
+                            <div class="form-group"><label>Límite Crítico (Alerta):</label><input type="number" id="alta-critico"></div>
+                            <div class="form-group"><label>Categoría:</label>
+                                <select id="alta-categoria">
+                                    <option value="Medicamentos">Medicamentos</option>
+                                    <option value="Descartables">Descartables</option>
+                                    <option value="Insumos de Alto Costo">Insumos de Alto Costo</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:10px; justify-content:flex-end;">
+                            <button class="btn-submit" style="width:auto; background-color: #a0aec0;" onclick="document.getElementById('panel-nuevo-insumo').style.display='none'">Cancelar</button>
+                            <button class="btn-submit" style="width:auto; background-color: #2b6cb0;" onclick="funcionAltaProducto()">Guardar en Catálogo</button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                            <tr style="background:#2d3748; color:white;">
+                                <th>Nombre del Insumo</th>
+                                <th>Categoría</th>
+                                <th style="text-align:center;">Mínimo</th>
+                                <th style="text-align:center;">Estado</th>
+                                <th style="text-align:center;">Acciones</th>
+                            </tr>
+                            </thead>
+                            <tbody id="tabla-catalogo-insumos"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="sub-ingreso" class="card sub-inv" style="display:block;">
+                    <h3>Ingreso Masivo de Stock (Remito / Altas)</h3>
+                    <div class="form-group" style="background:#edf2f7; padding:15px; border-radius:8px; margin-bottom:20px; border:1px dashed #cbd5e0;">
+                        <label style="color:#2b6cb0;">N° de Remito / Factura (Opcional):</label>
+                        <input type="text" id="remito-numero" placeholder="Ej: 0001-00001234">
+                    </div>
+                    <div class="form-group">
+                        <label>Seleccionar Insumo:</label>
+                        <input type="text" id="ingreso-select" list="lista-insumos" autocomplete="off" placeholder="Escriba para buscar insumo..." style="width: 100%; padding: 8px;">
+                        <datalist id="lista-insumos"></datalist>
+                    </div>
+                    <div class="form-group" style="display:flex; gap:10px;">
+                        <div style="flex:1"><label>Cantidad:</label><input type="number" id="ingreso-cantidad" min="1"></div>
+                        <div style="flex:1"><label class="required">Fecha Ingreso:</label><input type="date" id="ingreso-fecha"></div>
+                        <div style="flex:1"><label>Vencimiento (Opcional):</label><input type="month" id="ingreso-vto"></div>
+                    </div>
+                    <button class="btn-submit" style="background-color: #4a5568;" onclick="agregarItemAlRemito()">Añadir a la lista de Ingreso</button>
+
+                    <h4 style="margin-top:20px;">Lista del Remito Actual:</h4>
+                    <div id="lista-remito-tmp"></div>
+                    <button onclick="confirmarIngresoMasivo()" style="background:#38b2ac; margin-top:10px; width:100%;" class="btn-submit">✔️ Confirmar y Guardar Ingreso Masivo</button>
+                </div>
+
+                <div id="sub-consumo" class="card sub-inv" style="display:none;">
+                    <h3>Registrar Consumo / Baja</h3>
+                    <div class="form-group">
+                        <label>Seleccionar Insumo:</label>
+                        <input type="text" id="consumo-select" list="lista-insumos" autocomplete="off" placeholder="Escriba para buscar insumo..." style="width: 100%; padding: 8px;">
+                    </div>
+                    <div class="form-group" style="display:flex; gap:10px;">
+                        <div style="flex:1"><label>Cantidad a descontar:</label><input type="number" id="consumo-cantidad" min="1"></div>
+                        <div style="flex:1"><label class="required">Fecha de Consumo:</label><input type="date" id="consumo-fecha"></div>
+                    </div>
+                    <button class="btn-submit" onclick="agregarItemAlConsumo()" style="background:#ed8936;">Añadir a la lista de Baja</button>
+
+                    <h4 style="margin-top:20px;">Lista de Consumos a Procesar:</h4>
+                    <div id="lista-consumo-tmp"></div>
+                    <button onclick="confirmarConsumoMasivo()" class="btn-submit" style="background:#dd6b20; margin-top:10px; width:100%;">✔️ Confirmar y Descontar Stock</button>
+                </div>
+
+                <div id="sub-stock" class="card sub-inv" style="display:none;">
+                    <h3>Inventario Físico Actual</h3>
+                    <div id="lista-inventario" class="table-responsive"></div>
+                </div>
+
+                <div id="sub-ingresos-periodo" class="card sub-inv" style="display:none;">
+                    <h3 style="color:#2d3748; border-bottom:2px solid #e2e8f0; padding-bottom:10px;">Reportes de Movimientos de Insumos</h3>
+
+                    <div class="filtros-box" style="display:flex; flex-direction:column; gap:15px; background:white; border:none; padding:0;">
+                        <div style="display:flex; gap:15px; width:100%; background:#f7fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0;">
+                            <div style="flex:1;"><label>Desde Fecha:</label><input type="date" id="reporte-inicio"></div>
+                            <div style="flex:1;"><label>Hasta Fecha:</label><input type="date" id="reporte-fin"></div>
+                        </div>
+
+                        <div style="display:flex; gap:15px; align-items:flex-end; background:#edf2f7; padding:15px; border-radius:8px; flex-wrap:wrap;">
+                            <div style="flex:1; min-width:250px;">
+                                <label style="color:#2b6cb0;">1. Reporte General (Todos los insumos)</label>
+                                <button class="btn-submit" style="background:#3182ce; margin-top:5px;" onclick="generarReporte(false)">📊 Generar General</button>
+                            </div>
+                            <div style="flex:2; min-width:300px;">
+                                <label style="color:#2b6cb0;">2. Reporte Individual (Insumo específico)</label>
+                                <div style="display:flex; gap:10px;">
+                                    <input type="text" id="reporte-insumo-select" list="lista-insumos" autocomplete="off" placeholder="Escriba para buscar insumo..." style="flex:2; padding:10px;">
+                                    <button class="btn-submit" style="background:#2b6cb0; margin-top:0; flex:1;" onclick="generarReporte(true)">🔍 Generar Individual</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="contenedor-reporte-resultados" style="display:none; margin-top:25px;">
+                        <h4 id="titulo-tipo-reporte" style="color:#2d3748; background:#ebf8ff; padding:10px; border-radius:6px; border-left:4px solid #3182ce;">Resultados</h4>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                <tr style="background:#2b6cb0; color:white;">
+                                    <th>Insumo / Producto</th>
+                                    <th style="text-align:center;">Total Ingreso</th>
+                                    <th style="text-align:center;">Total Egreso</th>
+                                </tr>
+                                </thead>
+                                <tbody id="tabla-reporte-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="pantalla-oxigeno" class="pantalla">
+                <div style="margin-bottom: 25px; display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button class="btn-submit" style="margin-top:0; width: auto; background-color: #4a5568; font-size: 12px; padding: 8px;" onclick="mostrarSubGas('sub-gas-estadisticas'); cargarGases();">1. ESTADO DE SALA (PANEL CONTROL)</button>
+                    <button class="btn-submit" style="margin-top:0; width: auto; background-color: #38b2ac; font-size: 12px; padding: 8px;" onclick="mostrarSubGas('sub-gas-ingreso')">2. Recepción / Entrega Proveedor</button>
+                    <button class="btn-submit" style="margin-top:0; width: auto; background-color: #e53e3e; font-size: 12px; padding: 8px;" onclick="mostrarSubGas('sub-gas-consumo')">3. Bajas (Tubos Vaciados)</button>
+                </div>
+
+                <div id="sub-gas-estadisticas" class="card sub-gas" style="display: block;">
+                    <h3 style="border-bottom: 2px solid #2d3748; padding-bottom: 10px;">📋 Panel Rápido: ¿Qué necesito pedir?</h3>
+                    <div id="panel-estado-gases-dinamico" style="margin-bottom: 20px;"></div>
+                    <div id="auditoria-tubos" style="margin-bottom: 30px;"></div>
+
+                    <div id="panel-correccion-admin" style="display:none; background:#fffaf0; border:2px dashed #ed8936; padding:15px; border-radius:8px; margin-bottom:30px;">
+                        <h4 style="margin-top:0; color:#dd6b20;">🛠️ Corrección Manual de Inventario Físico (Solo Administrador)</h4>
+                        <div class="grid-4-col" style="align-items:end;">
+                            <div class="form-group"><label>Tipo de Tubo:</label><select id="ajuste-gas-tipo"></select></div>
+                            <div class="form-group"><label>Llenos Reales:</label><input type="number" id="ajuste-gas-llenos" value="0"></div>
+                            <div class="form-group"><label>Vacíos Reales:</label><input type="number" id="ajuste-gas-vacios" value="0"></div>
+                            <button class="btn-submit" style="background-color: #dd6b20; margin-bottom: 15px;" onclick="forzarAjusteGas()">Pisar y Corregir Stock</button>
+                        </div>
+                    </div>
+
+                    <h3 style="border-top: 1px solid #e2e8f0; padding-top: 10px; margin-top: 30px;">📊 Estimación de Consumo por Período</h3>
+                    <div class="filtros-box" style="background: #f7fafc; border-color: #e2e8f0;">
+                        <div style="flex-grow:1;"><label>Desde:</label><input type="date" id="analisis-gas-inicio"></div>
+                        <div style="flex-grow:1;"><label>Hasta:</label><input type="date" id="analisis-gas-fin"></div>
+                        <button class="btn-submit" style="width:auto; background-color: #2d3748;" onclick="generarReporteGases()">🔍 Ver Consumo</button>
+                    </div>
+                    <div class="table-responsive">
+                        <h4 style="color: #3182ce;">Oxígeno (O2)</h4>
+                        <table><thead><tr style="background:#3182ce; color:white;"><th>Capacidad de Tubo</th><th style="text-align:center;">Tubos Vaciados</th><th style="text-align:center;">Volumen Gastado</th></tr></thead><tbody id="tabla-reporte-o2-body"></tbody></table>
+                        <h4 style="color: #4a5568; margin-top: 25px;">Dióxido de Carbono (CO2)</h4>
+                        <table><thead><tr style="background:#4a5568; color:white;"><th>Capacidad de Tubo</th><th style="text-align:center;">Tubos Vaciados</th><th style="text-align:center;">Peso Gastado</th></tr></thead><tbody id="tabla-reporte-co2-body"></tbody></table>
+                    </div>
+                </div>
+
+                <div id="sub-gas-ingreso" class="card sub-gas" style="display: none;">
+                    <div id="vista-form-gas-ingreso">
+                        <h3>🚚 Recepción de Tubos</h3>
+                        <div class="grid-2-col">
+                            <div class="form-group"><label>Tamaño / Tipo de Tubo:</label><select id="gas-ingreso-tipo"></select></div>
+                            <div class="form-group"><label class="required">Fecha de Recepción:</label><input type="date" id="gas-ingreso-fecha"></div>
+                        </div>
+                        <div class="grid-2-col">
+                            <div class="form-group"><label style="color:#38a169;">LLENOS Recibidos (Entran a clínica):</label><input type="number" id="gas-ingreso-llenos" value="0"></div>
+                            <div class="form-group"><label style="color:#e53e3e;">VACÍOS Devueltos (Se lleva el proveedor):</label><input type="number" id="gas-ingreso-vacios" value="0"></div>
+                        </div>
+                        <button class="btn-submit" style="background-color: #38b2ac;" onclick="agregarGasAlRemito()">➕ Añadir a la lista de movimiento</button>
+
+                        <div class="table-responsive">
+                            <table style="margin-top:20px;">
+                                <thead><tr><th>Fecha</th><th>Tipo de Tubo</th><th>Entran Llenos</th><th>Salen Vacíos</th><th>Quitar</th></tr></thead>
+                                <tbody id="tabla-remito-gas-body"></tbody>
+                            </table>
+                        </div>
+                        <button class="btn-submit" style="background-color: #2c7a7b; margin-top: 15px;" onclick="confirmarIngresoGasMasivo()">💾 Confirmar Movimiento Completo</button>
+                    </div>
+                    <div id="vista-exito-gas-ingreso" class="pantalla-exito">
+                        <h2 style="color:#2f855a;">¡Movimiento Guardado!</h2>
+                        <button class="btn-submit" onclick="nuevoRegistroGasIngreso()" style="width:auto; padding:10px 20px; background:#38a169;">Registrar otro movimiento</button>
+                    </div>
+                </div>
+
+                <div id="sub-gas-consumo" class="card sub-gas" style="display: none;">
+                    <h3>💨 Registro de Tubo Vaciado</h3>
+                    <div class="form-group"><label>Tamaño / Tipo de Tubo que se vació:</label><select id="gas-consumo-tipo"></select></div>
+                    <div class="grid-2-col">
+                        <div class="form-group"><label>Cantidad de tubos vaciados:</label><input type="number" id="gas-consumo-cant" value="1" min="1"></div>
+                        <div class="form-group"><label class="required">Fecha del vaciado:</label><input type="date" id="gas-consumo-fecha"></div>
+                    </div>
+                    <button class="btn-submit" style="background-color: #e53e3e;" onclick="registrarConsumoGas()">Confirmar Baja</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div id="modal-ficha-equipo" class="modal-overlay">
+    <div class="modal-content">
+        <div class="ficha-header">
+            <h2 class="ficha-title" id="ficha-titulo">Ficha Clínica del Equipo</h2>
+            <button class="btn-close" onclick="document.getElementById('modal-ficha-equipo').style.display='none'">X Cerrar</button>
+        </div>
+        <h4 style="color:#dd6b20; border-bottom:1px solid #eee; padding-bottom:5px;">🛠️ Historial de Reparaciones / Service</h4>
+        <ul id="ficha-reparaciones" style="color:#4a5568; line-height: 1.6;"></ul>
+        <h4 style="color:#e53e3e; border-bottom:1px solid #eee; padding-bottom:5px; margin-top:30px;">⚠️ Observaciones y Fallas en Controles Pre-Turno</h4>
+        <p style="font-size:13px; color:#718096;">Muestra todos los controles donde el personal técnico reportó problemas o dejó una nota sobre este endoscopio.</p>
+        <div class="table-responsive">
+            <table>
+                <thead><tr style="background:#e53e3e; color:white;"><th>Fecha</th><th>Técnico</th><th>Falla Reportada / Observación</th></tr></thead>
+                <tbody id="ficha-controles-body"></tbody>
+            </table>
+        </div>
+        <div style="text-align: right; margin-top: 25px;"><button class="btn-submit" style="width:auto; background:#4a5568;" onclick="window.print()">🖨️ Imprimir Ficha</button></div>
+    </div>
+</div>
+
+<div id="modal-mi-perfil" class="modal-overlay">
+    <div class="modal-content" style="max-width: 500px;">
+        <div class="ficha-header">
+            <h2 class="ficha-title">👤 Mi Perfil</h2>
+            <button class="btn-close" onclick="document.getElementById('modal-mi-perfil').style.display='none'">X Cerrar</button>
+        </div>
+        <div class="form-group"><label>Nombre:</label><input type="text" id="perfil-nombre"></div>
+        <div class="form-group"><label>Apellido:</label><input type="text" id="perfil-apellido"></div>
+        <div class="form-group"><label>Email:</label><input type="email" id="perfil-email"></div>
+        <div class="form-group"><label>Teléfono:</label><input type="text" id="perfil-telefono"></div>
+        <div class="form-group"><label>Dirección:</label><input type="text" id="perfil-direccion"></div>
+        <button class="btn-submit" style="background-color: #3182ce; margin-top: 20px;" onclick="guardarMiPerfil()">💾 Guardar Mis Datos</button>
+    </div>
+</div>
+
+<div id="modal-exito" class="modal-overlay">
+    <div style="background:white; padding:40px; border-radius:12px; text-align:center; max-width:450px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+        <div style="font-size:70px; color:#38b2ac; margin-bottom:10px;">✔️</div>
+        <h2 style="color:#2d3748; margin-bottom:15px;">¡Guardado Exitoso!</h2>
+        <p style="color:#4a5568; margin-bottom:25px; font-size:1.1em;">La planilla de control de sala se registró correctamente en la base de datos de la clínica.</p>
+        <hr style="border: 0; border-top: 1px solid #e2e8f0; margin-bottom: 20px;">
+        <p style="color:#2d3748; font-weight:bold; margin-bottom:20px; font-size:1.2em;">¿Deseas cargar otro control ahora?</p>
+        <div style="display:flex; gap:15px; justify-content:center;">
+            <button onclick="cerrarModalExito(true)" style="background:#38b2ac; color:white; border:none; padding:12px 25px; border-radius:8px; cursor:pointer; font-weight:bold;">Sí, cargar otro</button>
+            <button onclick="cerrarModalExito(false)" style="background:#e53e3e; color:white; border:none; padding:12px 25px; border-radius:8px; cursor:pointer; font-weight:bold;">No, terminar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- VARIABLES GLOBALES ---
+    let userActivo = ""; let rolActual = "";
+    let equiposDB = []; let baseDeDatosProductos = {}; let estadoGases = {};
+    let remitoTmp = []; let consTmp = []; let remitoGasTmp = [];
+    let isSubmittingControl = false;
+
+    // ==========================================
+    // 1. SESIÓN Y ACCESO
+    // ==========================================
+    async function iniciarSesion() {
+        const u = document.getElementById('username').value;
+        const p = document.getElementById('password').value;
+        try {
+            const res = await fetch(`/api/usuarios/login?username=${u}&password=${p}`, {method:'POST'});
+            if(res.ok) {
+                const data = await res.json(); userActivo = data.username; rolActual = data.rol;
+                document.getElementById('display-user').innerText = `👤 ${userActivo} (${rolActual})`;
+                document.getElementById('login-screen').style.display='none';
+                document.getElementById('dashboard-screen').style.display='flex';
+                if(rolActual === "Administrador" || rolActual === "Administrativa") {
+                    document.getElementById('btn-reparaciones').style.display = 'inline-block';
+                    document.getElementById('btn-ctrl-alta').style.display = 'inline-block';
+                    document.getElementById('btn-inv-alta').style.display = 'inline-block';
+                }
+                if(rolActual === "Administrador") { document.getElementById('btn-usuarios').style.display = 'flex'; document.getElementById('panel-correccion-admin').style.display = 'block'; cargarUsuarios(); }
+                cargarEquipos(); cargarInsumos(); cargarGases();
+            } else alert("Error de credenciales");
+        } catch (e) { alert("Sin conexión al servidor."); }
+    }
+
+    // --- NAVEGACIÓN ---
+    function cambiarPantalla(id, btn) { document.querySelectorAll('.pantalla').forEach(p=>p.classList.remove('active')); document.querySelectorAll('.menu-btn').forEach(b=>b.classList.remove('active')); document.getElementById(id).classList.add('active'); document.getElementById(btn).classList.add('active'); }
+    function mostrarSubCtrl(id) { ['sub-alta-equipo','sub-form','sub-historial','sub-equipos'].forEach(s=>document.getElementById(s).style.display='none'); document.getElementById(id).style.display='block'; }
+    function mostrarSubInv(id) { document.querySelectorAll('.sub-inv').forEach(s => s.style.display='none'); document.getElementById(id).style.display='block'; }
+    function mostrarSubGas(id) { document.querySelectorAll('.sub-gas').forEach(s => s.style.display='none'); document.getElementById(id).style.display='block'; }
+
+    let miUsuarioId = null; let misDatosCompletos = null;
+    async function abrirMiPerfil() {
+        try {
+            const res = await fetch('/api/usuarios'); const usuarios = await res.json();
+            const miUser = usuarios.find(u => u.username === userActivo);
+            if(miUser) {
+                miUsuarioId = miUser.id; misDatosCompletos = miUser;
+                document.getElementById('perfil-nombre').value = miUser.nombreReal || '';
+                document.getElementById('perfil-apellido').value = miUser.apellido || '';
+                document.getElementById('perfil-email').value = miUser.email || '';
+                document.getElementById('perfil-telefono').value = miUser.telefono || '';
+                document.getElementById('perfil-direccion').value = miUser.direccion || '';
+                document.getElementById('modal-mi-perfil').style.display = 'flex';
+            }
+        } catch(e) { alert("Error al cargar perfil."); }
+    }
+    async function guardarMiPerfil() {
+        const payload = { ...misDatosCompletos, nombreReal: document.getElementById('perfil-nombre').value, apellido: document.getElementById('perfil-apellido').value, email: document.getElementById('perfil-email').value, telefono: document.getElementById('perfil-telefono').value, direccion: document.getElementById('perfil-direccion').value };
+        try { await fetch(`/api/usuarios/editar/${miUsuarioId}`, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) }); alert("Perfil actualizado correctamente."); document.getElementById('modal-mi-perfil').style.display = 'none'; } catch(e) { alert("Error al guardar perfil."); }
+    }
+
+    // ==========================================
+    // 2. CONTROL DE SALA
+    // ==========================================
+    async function guardarTodoElControl() {
+        if (isSubmittingControl) return;
+
+        try {
+            const gastro = document.getElementById('sel-gastro'); const colono = document.getElementById('sel-colono');
+            if(!gastro || !colono) return alert("❌ Error: No encuentro los selectores.");
+            if(!gastro.value && !colono.value) return alert("⚠️ Debes seleccionar al menos un equipo médico.");
+
+            isSubmittingControl = true;
+            document.getElementById('btn-guardar-control').innerText = "⏳ Guardando, espere por favor...";
+            document.getElementById('btn-guardar-control').style.opacity = "0.7";
+
+            const leer = (id) => { const el = document.getElementById(id); return el ? el.value : ""; };
+            const payload = {
+                usuarioResponsable: userActivo || "Usuario Desconocido",
+                pc: leer('chk-pc'), impresora: leer('chk-imp'), liquidoDesinfectante: leer('chk-liq'), lavadora: leer('chk-lav'),
+                nivelO2: leer('chk-o2'), nivelCO2: leer('chk-co2'), frascosBiopsia: leer('chk-frascos'),
+                observacionesSala: leer('chk-obs-sala'),
+                gastroId: gastro.value ? parseInt(gastro.value) : null,
+                gastroAlias: gastro.value ? gastro.options[gastro.selectedIndex].text : "No utilizado",
+                gastroLuz: leer('gastro-luz'), gastroMov: leer('gastro-mov'), gastroFuga: leer('gastro-fuga'), gastroCanal: leer('gastro-canal'), gastroObs: leer('gastro-obs'),
+                colonoId: colono.value ? parseInt(colono.value) : null,
+                colonoAlias: colono.value ? colono.options[colono.selectedIndex].text : "No utilizado",
+                colonoLuz: leer('colono-luz'), colonoMov: leer('colono-mov'), colonoFuga: leer('colono-fuga'), colonoCanal: leer('colono-canal'), colonoObs: leer('colono-obs')
+            };
+
+            const res = await fetch('/api/control-diario', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+            if (res.ok) {
+                await cargarHistorial();
+                limpiarFormularioControl();
+                document.getElementById('modal-exito').style.display = 'flex';
+            } else { alert("❌ Error al guardar en base de datos."); }
+        } catch (error) {
+            alert("🚨 ERROR: " + error.message);
+        } finally {
+            isSubmittingControl = false;
+            document.getElementById('btn-guardar-control').innerText = "✔️ FIRMAR Y GUARDAR CONTROL DIARIO";
+            document.getElementById('btn-guardar-control').style.opacity = "1";
+        }
+    }
+
+    function limpiarFormularioControl() {
+        const limpiarTxt = (id) => { if(document.getElementById(id)) document.getElementById(id).value = ""; };
+        limpiarTxt('chk-obs-sala'); limpiarTxt('gastro-obs'); limpiarTxt('colono-obs');
+        const todos = ['sel-gastro','sel-colono','chk-pc','chk-imp','chk-liq','chk-lav','chk-o2','chk-co2','gastro-luz','gastro-mov','gastro-fuga','gastro-canal','colono-luz','colono-mov','colono-fuga','colono-canal'];
+        todos.forEach(id => { const el = document.getElementById(id); if(el) el.selectedIndex = 0; });
+        if(document.getElementById('chk-frascos')) document.getElementById('chk-frascos').value = 0;
+    }
+
+    function cerrarModalExito(quiereCargarOtro) {
+        document.getElementById('modal-exito').style.display = 'none';
+        if (!quiereCargarOtro) window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function cargarHistorial() {
+        try {
+            const res = await fetch('/api/control-diario'); const data = await res.json();
+            const d = document.getElementById('f-desde')?.value; const h = document.getElementById('f-hasta')?.value;
+            let filtrado = d || h ? data.filter(c => { const f = c.fechaHora.split('T')[0]; return (!d || f >= d) && (!h || f <= h); }) : data;
+            let html = `<table><thead><tr style="background:#3182ce; color:white;"><th>Fecha</th><th>Usuario</th><th>Gastro (Obs)</th><th>Colono (Obs)</th><th>Novedades</th></tr></thead><tbody>`;
+            filtrado.reverse().forEach(c => {
+                let obsSala = c.observacionesSala ? `<span style="color:red; font-weight:bold;">${c.observacionesSala}</span>` : 'OK';
+                html += `<tr><td>${new Date(c.fechaHora).toLocaleString()}</td><td>${c.usuarioResponsable}</td><td>${c.gastroAlias} <small>${c.gastroObs||''}</small></td><td>${c.colonoAlias} <small>${c.colonoObs||''}</small></td><td>${obsSala}</td></tr>`;
+            });
+            const tabla = document.getElementById('tabla-historial'); if(tabla) tabla.innerHTML = html + "</tbody></table>";
+        } catch (e) {}
+    }
+
+    // ==========================================
+    // 3. INVENTARIO (Insumos y Catálogo)
+    // ==========================================
+    async function cargarInsumos() {
+        try {
+            const res = await fetch('/api/insumos'); const data = await res.json();
+            baseDeDatosProductos = {}; let opcionesBuscador = '';
+            data.forEach(p => {
+                baseDeDatosProductos[p.id] = p;
+                opcionesBuscador += `<option data-id="${p.id}" value="${p.nombre}"></option>`;
+            });
+            document.getElementById('lista-insumos').innerHTML = opcionesBuscador;
+            dibujarInventario(); dibujarCatalogoInsumos();
+        } catch(e) {}
+    }
+
+    function dibujarInventario() {
+        let cuadro = document.getElementById('lista-inventario'); if (!cuadro) return;
+        let lista = Object.values(baseDeDatosProductos).sort((a,b) => a.nombre.localeCompare(b.nombre));
+        let h = `<table><thead><tr style="background:#4a5568; color:white;"><th>Insumo</th><th>Stock</th><th>Estado</th></tr></thead><tbody>`;
+        lista.forEach(p => { const est = p.stock <= p.stockCritico ? '⚠️ Crítico' : '✔️ Normal'; h += `<tr><td>${p.nombre}</td><td><b>${p.stock}</b></td><td>${est}</td></tr>`; });
+        cuadro.innerHTML = h + "</tbody></table>";
+    }
+
+    function dibujarCatalogoInsumos() {
+        const tb = document.getElementById('tabla-catalogo-insumos'); if (!tb) return;
+        tb.innerHTML = "";
+        let lista = Object.values(baseDeDatosProductos).sort((a,b) => a.nombre.localeCompare(b.nombre));
+        lista.forEach(p => {
+            const isActivo = p.activo !== false;
+            const btnEstado = isActivo
+                ? `<button onclick="cambiarEstadoInsumo(${p.id})" class="btn-warning">⏸️ Suspender</button>`
+                : `<button onclick="cambiarEstadoInsumo(${p.id})" class="btn-success">▶️ Activar</button>`;
+            tb.innerHTML += `<tr><td><b>${p.nombre}</b></td><td>${p.categoria}</td><td style="text-align:center;">${p.stockCritico}</td><td style="text-align:center;">${isActivo ? '🟢 Activo' : '🔴 Susp.'}</td>
+            <td style="text-align:center;">
+                <button onclick="editarInsumo(${p.id}, '${p.nombre}', '${p.categoria}', ${p.stockCritico})" class="btn-info">✏️ Editar</button>
+                ${btnEstado}
+                <button onclick="eliminarInsumo(${p.id})" class="btn-danger">🗑️ Eliminar</button>
+            </td></tr>`;
+        });
+    }
+
+    async function cambiarEstadoInsumo(id) { await fetch(`/api/insumos/estado/${id}`, { method: 'POST' }); cargarInsumos(); }
+    async function eliminarInsumo(id) {
+        if(confirm("⚠️ ¿Eliminar insumo DE FORMA PERMANENTE?\nNota: Si ya tiene historial, el sistema podría impedirlo. Usa 'Suspender' en su lugar.")) {
+            try { const res = await fetch(`/api/insumos/${id}`, {method: 'DELETE'}); if(!res.ok) throw new Error(); cargarInsumos(); }
+            catch(e) { alert("❌ No se puede eliminar. Usa el botón '⏸️ Suspender'."); }
+        }
+    }
+    async function editarInsumo(id, nom, cat, crit) { const n = prompt("Editar Nombre:", nom); if(n && n!==nom) await fetch(`/api/insumos/editar-nombre/${id}?nuevoNombre=${encodeURIComponent(n)}`, {method:'POST'}); const c = prompt("Editar Categoría:", cat); if(c && c!==cat) await fetch(`/api/insumos/editar-categoria/${id}?nuevaCategoria=${encodeURIComponent(c)}`, {method:'POST'}); const cr = prompt("Editar Mínimo Crítico:", crit); if(cr && cr!==crit.toString()) await fetch(`/api/insumos/modificar-critico/${id}?nuevoCritico=${cr}`, {method:'POST'}); cargarInsumos(); }
+    async function funcionAltaProducto() { const p = { nombre: document.getElementById('alta-nombre').value, stockCritico: parseInt(document.getElementById('alta-critico').value), categoria: document.getElementById('alta-categoria').value, stock: 0 }; await fetch('/api/insumos', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(p)}); document.getElementById('alta-nombre').value=""; document.getElementById('alta-critico').value=""; alert("Insumo Registrado"); cargarInsumos(); document.getElementById('panel-nuevo-insumo').style.display='none'; }
+
+    // --- INGRESOS Y EGRESOS DE INSUMOS ---
+    function agregarItemAlRemito() {
+        const nombre = document.getElementById('ingreso-select').value;
+        const op = document.querySelector(`#lista-insumos option[value="${nombre}"]`);
+        if (!op) return alert("❌ Seleccione un insumo válido de la lista.");
+        const idx = op.getAttribute('data-id');
+        const cant = parseInt(document.getElementById('ingreso-cantidad').value);
+        const fecha = document.getElementById('ingreso-fecha').value;
+        const vto = document.getElementById('ingreso-vto').value || "-";
+        if(!cant || !fecha) return alert("Complete los datos requeridos.");
+        if (fecha > new Date().toISOString().split('T')[0]) return alert("❌ Fecha no puede ser futura.");
+
+        remitoTmp.push({ id: baseDeDatosProductos[idx].id, nombre: baseDeDatosProductos[idx].nombre, cant: cant, fecha: fecha, vto: vto });
+        dibujarRemito(); document.getElementById('ingreso-select').value = ""; document.getElementById('ingreso-cantidad').value = "";
+    }
+
+    function dibujarRemito() {
+        if(remitoTmp.length===0){ document.getElementById('lista-remito-tmp').innerHTML="<i>No hay insumos cargados.</i>"; return;}
+        remitoTmp.sort((a,b) => a.nombre.localeCompare(b.nombre));
+        let h="<table style='width:100%; border-collapse:collapse;'><tr><th>Insumo</th><th>Cant</th><th>Vto</th><th>Acción</th></tr>";
+        remitoTmp.forEach((x,i)=>{ h+=`<tr><td>${x.nombre}</td><td style='color:green; font-weight:bold;'>+${x.cant}</td><td>${x.vto}</td><td><button onclick="remitoTmp.splice(${i},1); dibujarRemito()" class="btn-danger">X</button></td></tr>`; });
+        document.getElementById('lista-remito-tmp').innerHTML=h+"</table>";
+    }
+
+    async function confirmarIngresoMasivo() {
+        if(remitoTmp.length === 0) return alert("La lista está vacía.");
+        const numRemito = document.getElementById('remito-numero').value;
+        for(let x of remitoTmp) {
+            let url = `/api/insumos/ingresar/${x.id}?cantidad=${x.cant}&fecha=${x.fecha}`;
+            if (numRemito) url += `&numeroRemito=${encodeURIComponent(numRemito)}`;
+            await fetch(url, {method:'POST'});
+        }
+        remitoTmp=[]; dibujarRemito(); await cargarInsumos(); document.getElementById('remito-numero').value = ""; alert("✔️ Remito Procesado.");
+    }
+
+    function agregarItemAlConsumo() {
+        const nombre = document.getElementById('consumo-select').value;
+        const op = document.querySelector(`#lista-insumos option[value="${nombre}"]`);
+        if (!op) return alert("❌ Seleccione un insumo válido de la lista.");
+        const idx = op.getAttribute('data-id');
+        const cant = parseInt(document.getElementById('consumo-cantidad').value);
+        const fecha = document.getElementById('consumo-fecha').value;
+        if(!cant || !fecha) return alert("Complete los datos requeridos.");
+        if (fecha > new Date().toISOString().split('T')[0]) return alert("❌ Fecha no puede ser futura.");
+        if(cant > baseDeDatosProductos[idx].stock) return alert(`❌ No hay suficiente stock. (Disponible: ${baseDeDatosProductos[idx].stock})`);
+
+        consTmp.push({ id: baseDeDatosProductos[idx].id, nombre: baseDeDatosProductos[idx].nombre, cant: cant, fecha: fecha });
+        dibujarConsumo(); document.getElementById('consumo-select').value = ""; document.getElementById('consumo-cantidad').value = "";
+    }
+
+    function dibujarConsumo() {
+        if(consTmp.length===0){ document.getElementById('lista-consumo-tmp').innerHTML="<i>No hay consumos cargados.</i>"; return;}
+        consTmp.sort((a,b) => a.nombre.localeCompare(b.nombre));
+        let h="<table style='width:100%; border-collapse:collapse;'><tr><th>Insumo</th><th>Cant a descontar</th><th>Acción</th></tr>";
+        consTmp.forEach((x,i)=>{ h+=`<tr><td>${x.nombre}</td><td style='color:red; font-weight:bold;'>-${x.cant}</td><td><button onclick="consTmp.splice(${i},1); dibujarConsumo()" class="btn-danger">X</button></td></tr>`; });
+        document.getElementById('lista-consumo-tmp').innerHTML=h+"</table>";
+    }
+
+    async function confirmarConsumoMasivo() {
+        if(consTmp.length === 0) return alert("La lista está vacía.");
+        for(let x of consTmp) await fetch(`/api/insumos/consumir/${x.id}?cantidad=${x.cant}&fecha=${x.fecha}`, {method:'POST'});
+        consTmp=[]; dibujarConsumo(); await cargarInsumos(); alert("✔️ Consumos descontados.");
+    }
+
+    // --- REPORTE DE MOVIMIENTOS UNIFICADO ---
+    async function generarReporte(esIndividual) {
+        const i = document.getElementById('reporte-inicio').value;
+        const f = document.getElementById('reporte-fin').value;
+        if(!i || !f) return alert("Por favor, seleccione las fechas 'Desde' y 'Hasta'.");
+
+        let insumoFiltro = "";
+        if (esIndividual) {
+            insumoFiltro = document.getElementById('reporte-insumo-select').value.trim().toLowerCase();
+            if (!insumoFiltro) return alert("Por favor, seleccione un insumo de la lista para buscar.");
+        }
+
+        document.getElementById('contenedor-reporte-resultados').style.display = 'block';
+        const tb = document.getElementById('tabla-reporte-body');
+        tb.innerHTML = `<tr><td colspan="3" style="text-align:center;">⏳ Calculando movimientos...</td></tr>`;
+
+        try {
+            // USANDO LAS RUTAS ORIGINALES QUE JAVA RECONOCE PARA EVITAR ERROR 405
+            const resI = await fetch(`/api/insumos/ingresos?inicio=${i}&fin=${f}`);
+            const resC = await fetch(`/api/insumos/consumos?inicio=${i}&fin=${f}`);
+
+            if(!resI.ok || !resC.ok) throw new Error("Error en conexión");
+
+            const ing = await resI.json();
+            const cons = await resC.json();
+
+            let consolidados = {};
+            ing.forEach(m => {
+                if(!consolidados[m.insumoNombre]) consolidados[m.insumoNombre]={ing:0, egr:0};
+                consolidados[m.insumoNombre].ing += m.cantidad;
+            });
+            cons.forEach(m => {
+                if(!consolidados[m.insumoNombre]) consolidados[m.insumoNombre]={ing:0, egr:0};
+                consolidados[m.insumoNombre].egr += m.cantidad;
+            });
+
+            let reporteDatos = Object.keys(consolidados).map(n => ({producto: n, ingreso: consolidados[n].ing, egreso: consolidados[n].egr}));
+
+            if (esIndividual) {
+                reporteDatos = reporteDatos.filter(d => d.producto.toLowerCase() === insumoFiltro);
+            }
+
+            reporteDatos.sort((a,b) => a.producto.localeCompare(b.producto));
+            document.getElementById('titulo-tipo-reporte').innerText = esIndividual ? `Reporte de Movimientos: ${document.getElementById('reporte-insumo-select').value}` : "Reporte General de Movimientos";
+
+            let html = "";
+            if(reporteDatos.length === 0) {
+                html = `<tr><td colspan="3" style="text-align:center;">No hay movimientos registrados para esta búsqueda en las fechas indicadas.</td></tr>`;
+            } else {
+                reporteDatos.forEach(d => {
+                    html += `<tr>
+                                <td><b>${d.producto}</b></td>
+                                <td style="color:green; font-weight:bold; text-align:center;">+ ${d.ingreso}</td>
+                                <td style="color:red; font-weight:bold; text-align:center;">- ${d.egreso}</td>
+                             </tr>`;
+                });
+            }
+            tb.innerHTML = html;
+        } catch(e) {
+            tb.innerHTML = `<tr><td colspan="3" style="text-align:center; color:red;">❌ Error al generar reporte. Falló la conexión al servidor.</td></tr>`;
+        }
+    }
+
+    // ==========================================
+    // 4. MÓDULO GASES (SOLO TAMAÑOS REALES Y CONTROL ESTRICTO)
+    // ==========================================
+    const TIPOS_ESTANDAR_GASES = ["O2 - 10 m3", "O2 - 6.4 m3", "CO2 - 25 kgs", "CO2 - 12.5 kgs", "CO2 - 9 kgs"];
+
+    async function cargarGases() {
+        try {
+            const res = await fetch('/api/gases'); const gases = await res.json();
+            estadoGases = {};
+            // Inyectamos SIEMPRE los tamaños estándar en CERO primero
+            TIPOS_ESTANDAR_GASES.forEach(t => estadoGases[t] = { llenos: 0, vacios: 0 });
+
+            // Luego actualizamos si la base de datos nos manda números
+            gases.forEach(g => {
+                if (TIPOS_ESTANDAR_GASES.includes(g.tipo)) {
+                    estadoGases[g.tipo] = { llenos: g.llenos, vacios: g.vacios };
+                }
+            });
+            actualizarEstadisticasGases(); actualizarSelectoresGas();
+        } catch(e){}
+    }
+
+    function actualizarSelectoresGas() {
+        let htmlIng = ""; let htmlCon = ""; let htmlAj = "";
+        TIPOS_ESTANDAR_GASES.forEach(t => {
+            const ll = estadoGases[t].llenos; const va = estadoGases[t].vacios;
+            htmlIng += `<option value="${t}">${t} (Vacíos para devolver: ${va})</option>`;
+            htmlCon += `<option value="${t}">${t} (Llenos disponibles: ${ll})</option>`;
+            htmlAj += `<option value="${t}">${t}</option>`;
+        });
+        if(document.getElementById('gas-ingreso-tipo')) document.getElementById('gas-ingreso-tipo').innerHTML = htmlIng;
+        if(document.getElementById('gas-consumo-tipo')) document.getElementById('gas-consumo-tipo').innerHTML = htmlCon;
+        if(document.getElementById('ajuste-gas-tipo')) document.getElementById('ajuste-gas-tipo').innerHTML = htmlAj;
+    }
+
+    function actualizarEstadisticasGases() {
+        const p = document.getElementById('panel-estado-gases-dinamico'); p.innerHTML = "";
+        let tO2L = 0; let tO2V = 0; let tCO2L = 0; let tCO2V = 0; let dH = "";
+
+        TIPOS_ESTANDAR_GASES.forEach(tipo => {
+            const d = estadoGases[tipo];
+            if (tipo.includes("CO2")) { tCO2L += d.llenos; tCO2V += d.vacios; } else if (tipo.includes("O2")) { tO2L += d.llenos; tO2V += d.vacios; }
+            if(d.llenos > 0 || d.vacios > 0) {
+                dH += `<div style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between;"><span>${tipo}</span> <b>Llenos: <span style="color:green;">${d.llenos}</span> | Vacíos: <span style="color:red;">${d.vacios}</span></b></div>`;
+            }
+        });
+
+        let html = '<div class="grid-2-col" style="margin-bottom:20px;">';
+        html += `<div style="background:#fff; padding:20px; border-radius:12px; border:2px solid #e2e8f0;"><h2 style="margin:0 0 15px 0; color:#3182ce; text-align:center;">OXÍGENO (O2)</h2><h3 style="margin:0; text-align:center; color:#38a169;">🟢 Listos: ${tO2L}</h3><h3 style="margin:10px 0 20px 0; text-align:center; color:${tO2V>=5?'#e53e3e':'#4a5568'};">🔴 VACÍOS PARA PEDIR: ${tO2V}</h3><div style="background:#f7fafc; padding:10px; border-radius:8px; font-size:14px;">${dH.split('</div>').filter(x => !x.includes("CO2") && x.includes("O2")).join('</div>')}</div></div>`;
+        html += `<div style="background:#fff; padding:20px; border-radius:12px; border:2px solid #e2e8f0;"><h2 style="margin:0 0 15px 0; color:#4a5568; text-align:center;">CO2</h2><h3 style="margin:0; text-align:center; color:#38a169;">🟢 Listos: ${tCO2L}</h3><h3 style="margin:10px 0 20px 0; text-align:center; color:${tCO2V>=2?'#e53e3e':'#4a5568'};">🔴 VACÍOS PARA PEDIR: ${tCO2V}</h3><div style="background:#f7fafc; padding:10px; border-radius:8px; font-size:14px;">${dH.split('</div>').filter(x => x.includes("CO2")).join('</div>')}</div></div></div>`;
+        p.innerHTML = html;
+        document.getElementById('auditoria-tubos').innerHTML = `<div style="background:#fffaf0; padding:15px; border-radius:8px; border:1px solid #ed8936;"><h4 style="margin-top:0; color:#dd6b20;">⚠️ Auditoría Física (Parque)</h4><ul style="margin-bottom:0;"><li>Suma O2: <span style="font-weight:bold; color:${(tO2L+tO2V)!==11?'red':'green'};">${tO2L+tO2V}</span> (Deberían ser 11)</li><li>Suma CO2: <span style="font-weight:bold; color:${(tCO2L+tCO2V)!==4?'red':'green'};">${tCO2L+tCO2V}</span> (Deberían ser 4)</li></ul></div>`;
+    }
+
+    function agregarGasAlRemito() {
+        const t = document.getElementById('gas-ingreso-tipo').value; const ll = parseInt(document.getElementById('gas-ingreso-llenos').value)||0; const va = parseInt(document.getElementById('gas-ingreso-vacios').value)||0; const f = document.getElementById('gas-ingreso-fecha').value;
+        if(!f) return alert("Seleccione fecha."); if(ll===0 && va===0) return alert("Ingrese al menos un tubo.");
+        if (f > new Date().toISOString().split('T')[0]) return alert("❌ Fecha no puede ser futura.");
+
+        remitoGasTmp.push({tipo: t, llenos: ll, vacios: va, fecha: f});
+        dibujarRemitoGas();
+        document.getElementById('gas-ingreso-llenos').value = 0; document.getElementById('gas-ingreso-vacios').value = 0;
+    }
+
+    function dibujarRemitoGas() {
+        const b = document.getElementById('tabla-remito-gas-body'); b.innerHTML = "";
+        remitoGasTmp.forEach((g,i) => { b.innerHTML += `<tr><td>${g.fecha}</td><td>${g.tipo}</td><td style="color:green; font-weight:bold;">+${g.llenos}</td><td style="color:red; font-weight:bold;">-${g.vacios}</td><td><button onclick="remitoGasTmp.splice(${i},1);dibujarRemitoGas()" class="btn-danger">X</button></td></tr>`; });
+    }
+
+    async function confirmarIngresoGasMasivo() {
+        if(remitoGasTmp.length === 0) return alert("Lista vacía.");
+
+        let tLlenos = remitoGasTmp.reduce((acc, g) => acc + g.llenos, 0);
+        let tVacios = remitoGasTmp.reduce((acc, g) => acc + g.vacios, 0);
+
+        // ALERTA DE PROVEEDOR - PERMITE CONTINUAR SI LE DAN ACEPTAR
+        if (tLlenos > tVacios) {
+            if(!confirm(`⚠️ ADVERTENCIA DE PARQUE:\n\nLa cantidad de tubos RECIBIDOS (${tLlenos}) es MAYOR a los tubos ENTREGADOS (${tVacios}).\n\n¿Estás seguro de que deseas guardar este movimiento?`)) return;
+        }
+
+        for(let g of remitoGasTmp) await fetch(`/api/gases/ingreso?tipo=${encodeURIComponent(g.tipo)}&llenosRecibidos=${g.llenos}&vaciosEntregados=${g.vacios}&fecha=${g.fecha}`, {method:'POST'});
+        remitoGasTmp = []; dibujarRemitoGas(); document.getElementById('vista-form-gas-ingreso').style.display='none'; document.getElementById('vista-exito-gas-ingreso').style.display='block'; cargarGases();
+    }
+
+    function nuevoRegistroGasIngreso() { document.getElementById('vista-exito-gas-ingreso').style.display='none'; document.getElementById('vista-form-gas-ingreso').style.display='block'; }
+
+    async function registrarConsumoGas() {
+        const t = document.getElementById('gas-consumo-tipo').value; const c = parseInt(document.getElementById('gas-consumo-cant').value); const f = document.getElementById('gas-consumo-fecha').value;
+        if(!f) return alert("Seleccione fecha.");
+        if (f > new Date().toISOString().split('T')[0]) return alert("❌ Fecha futura.");
+        if(c > (estadoGases[t]?estadoGases[t].llenos:0)) return alert("❌ No hay suficientes tubos llenos registrados para dar de baja.");
+        await fetch(`/api/gases/consumo?tipo=${encodeURIComponent(t)}&cantidad=${c}&fecha=${f}`, {method:'POST'});
+        alert("✔️ Baja de tubo registrada."); cargarGases();
+    }
+
+    async function forzarAjusteGas() { const t = document.getElementById('ajuste-gas-tipo').value; const ll = document.getElementById('ajuste-gas-llenos').value; const va = document.getElementById('ajuste-gas-vacios').value; if(confirm(`Confirmar ${ll} Llenos y ${va} Vacíos para ${t}?`)) { await fetch(`/api/gases/ajustar?tipo=${encodeURIComponent(t)}&llenos=${ll}&vacios=${va}`, {method:'POST'}); alert("Corregido."); cargarGases(); } }
+
+    async function generarReporteGases() {
+        const i = document.getElementById('analisis-gas-inicio').value; const f = document.getElementById('analisis-gas-fin').value;
+        if(!i||!f) return alert("Fechas obligatorias.");
+        const res = await fetch(`/api/gases/reporte?inicio=${i}&fin=${f}`); const consumosGas = await res.json();
+        const tbO2 = document.getElementById('tabla-reporte-o2-body'); const tbCO2 = document.getElementById('tabla-reporte-co2-body');
+        tbO2.innerHTML = ""; tbCO2.innerHTML = ""; let sO2t=0, sO2v=0, sCO2t=0, sCO2v=0;
+        let ag = {}; consumosGas.forEach(r => { if(!ag[r.tipo]) ag[r.tipo]=0; ag[r.tipo]+=r.cantidad; });
+        for(const t in ag) {
+            if (!TIPOS_ESTANDAR_GASES.includes(t)) continue; // Filtrar basura de la BD
+            const ext = t.match(/([\d.]+)\s*(m3|kgs)/i); const val = ext ? (parseFloat(ext[1])*ag[t]) : 0;
+            const h = `<tr><td>${t}</td><td style="text-align:center; font-weight:bold;">${ag[t]}</td><td style="text-align:center; color:#2b6cb0; font-weight:bold;">${val.toFixed(2)} ${ext?ext[2]:''}</td></tr>`;
+            if(t.includes("CO2")) { tbCO2.innerHTML += h; sCO2t+=ag[t]; sCO2v+=val; } else { tbO2.innerHTML += h; sO2t+=ag[t]; sO2v+=val; }
+        }
+        tbO2.innerHTML += `<tr style="background:#ebf8ff; font-weight:bold;"><td>TOTAL O2:</td><td style="text-align:center; color:#c53030;">${sO2t}</td><td style="text-align:center; color:#2b6cb0;">${sO2v.toFixed(2)} m3</td></tr>`;
+        tbCO2.innerHTML += `<tr style="background:#f7fafc; font-weight:bold;"><td>TOTAL CO2:</td><td style="text-align:center; color:#c53030;">${sCO2t}</td><td style="text-align:center; color:#2b6cb0;">${sCO2v.toFixed(2)} kgs</td></tr>`;
+    }
+
+    // ==========================================
+    // 5. MÓDULO EQUIPOS Y USUARIOS
+    // ==========================================
+    async function cargarEquipos() { try { const res = await fetch('/api/control/endoscopios'); equiposDB = await res.json(); const sG = document.getElementById('sel-gastro'); const sC = document.getElementById('sel-colono'); sG.innerHTML = "<option value=''>-- Seleccionar Gastro --</option>"; sC.innerHTML = "<option value=''>-- Seleccionar Colono --</option>"; const ops = equiposDB.filter(e => e.activo && e.estado === 'Operativo'); ops.filter(e => e.tipo === 'Gastroscopio').forEach(e => sG.innerHTML += `<option value="${e.id}">${e.alias} (SN: ${e.serie})</option>`); ops.filter(e => e.tipo === 'Colonoscopio').forEach(e => sC.innerHTML += `<option value="${e.id}">${e.alias} (SN: ${e.serie})</option>`); } catch (e) {} }
+    async function funcionAltaEquipo() { const al = document.getElementById('eq-alias').value; const se = document.getElementById('eq-serie').value; const ti = document.getElementById('eq-tipo').value; if(!al || !se) return alert("Complete campos."); await fetch('/api/control/endoscopios', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({alias:al, serie:se, tipo:ti, activo:true, estado:"Operativo"})}); alert("¡Guardado!"); cargarEquipos(); mostrarSubCtrl('sub-form'); }
+    function dibujarEquipos() { let h = `<table><thead><tr style="background:#4a5568; color:white;"><th>Equipo</th><th>Tipo</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>`; equiposDB.forEach(e => { if(!e.activo) return; const isOp = e.estado === "Operativo"; const btnRep = isOp ? `<button onclick="mandarAReparar(${e.id})" class="btn-danger">Rotura</button>` : `<button onclick="volverAOperativo(${e.id})" class="btn-success">Alta</button>`; h += `<tr><td><b>${e.alias}</b> <small>SN:${e.serie}</small></td><td>${e.tipo}</td><td><b>${e.estado}</b></td><td>${btnRep} <button onclick="abrirFichaEquipo(${e.id})" class="btn-warning">Ficha</button> <button onclick="editarEndoscopio(${e.id}, '${e.alias}', '${e.serie}')" class="btn-info">Editar</button> <button onclick="eliminarEndoscopio(${e.id})" style="background:#718096; color:white; border:none; padding:8px 12px; border-radius:4px; font-size:12px; cursor:pointer;">Eliminar</button></td></tr>`; }); document.getElementById('lista-equipos').innerHTML = h + "</tbody></table>"; }
+    async function editarEndoscopio(id, mAct, sAct) { const nm = prompt("Editar Modelo:", mAct); if(!nm) return; const ns = prompt("Editar Serie:", sAct); if(!ns) return; await fetch(`/api/control/endoscopios/editar/${id}?modelo=${encodeURIComponent(nm)}&serie=${encodeURIComponent(ns)}`, {method:'PUT'}); cargarEquipos().then(dibujarEquipos); }
+    async function eliminarEndoscopio(id) { if(confirm("¿Eliminar equipo permanente?")) { await fetch(`/api/control/endoscopios/${id}`, {method:'DELETE'}); cargarEquipos().then(dibujarEquipos); } }
+    async function mandarAReparar(id) { const m = prompt("Motivo:"); if(!m) return; await fetch(`/api/control/endoscopios/${id}/reparar?motivo=${encodeURIComponent(m)}`, {method:'POST'}); cargarEquipos().then(dibujarEquipos); }
+    async function volverAOperativo(id) { await fetch(`/api/control/endoscopios/${id}/alta-reparacion`, {method:'POST'}); cargarEquipos().then(dibujarEquipos); }
+    async function abrirFichaEquipo(id) { const e = equiposDB.find(x=>x.id===id); document.getElementById('ficha-titulo').innerText = `${e.alias} (SN: ${e.serie})`; const ul = document.getElementById('ficha-reparaciones'); ul.innerHTML = ""; if(e.historialReparaciones && e.historialReparaciones.length>0) e.historialReparaciones.forEach(r => ul.innerHTML+=`<li>${r}</li>`); else ul.innerHTML="<li>Sin reparaciones</li>"; const tb = document.getElementById('ficha-controles-body'); document.getElementById('modal-ficha-equipo').style.display='flex'; try { const res = await fetch('/api/control-diario'); const data = await res.json(); let hc=""; let f=false; data.forEach(c => { let r=false; let obs=""; if(c.gastroId==id && (c.gastroLuz!=='ok'||c.gastroMov!=='ok'||c.gastroFuga!=='ok'||c.gastroCanal!=='ok'||(c.gastroObs&&c.gastroObs!==''))) { r=true; obs=`${c.gastroObs||'Falla detectada'}`; } if(c.colonoId==id && (c.colonoLuz!=='ok'||c.colonoMov!=='ok'||c.colonoFuga!=='ok'||c.colonoCanal!=='ok'||(c.colonoObs&&c.colonoObs!==''))) { r=true; obs=`${c.colonoObs||'Falla detectada'}`; } if(r) { f=true; hc+=`<tr><td>${new Date(c.fechaHora).toLocaleDateString()}</td><td>${c.usuarioResponsable}</td><td>${obs}</td></tr>`; } }); tb.innerHTML = f?hc:"<tr><td colspan='3' style='text-align:center;'>✅ Sin anomalías.</td></tr>"; } catch(e){} }
+
+    async function cargarUsuarios() { const res = await fetch('/api/usuarios'); const lista = await res.json(); const tb = document.getElementById('tabla-usuarios-body'); tb.innerHTML = ""; lista.forEach(u => { const a=u.activo!==false; const n=(u.nombreReal||"")+" "+(u.apellido||""); const e = a?`<button onclick="cambiarEstadoUsuario(${u.id})" class="btn-danger">Suspender</button>`:`<button onclick="cambiarEstadoUsuario(${u.id})" class="btn-success">Activar</button>`; const ed=`<button onclick="mostrarFormularioEdicionUsuario(${u.id},'${u.username}','${u.email||''}','${u.rol}','${u.nombreReal||''}','${u.apellido||''}','${u.dni||''}','${u.sexo||''}','${u.telefono||''}','${u.fechaNacimiento||''}','${u.pais||''}','${u.provincia||''}','${u.ciudad||''}','${u.direccion||''}')" class="btn-warning">✏️</button>`; tb.innerHTML+=`<tr><td>${n.trim()===""?u.username:n}</td><td>${u.username}</td><td>${u.rol}</td><td style="text-align:center;">${a?'🟢':'🔴'}</td><td>${ed} ${e}</td></tr>`; }); }
+    async function cambiarEstadoUsuario(id) { await fetch(`/api/usuarios/${id}/estado`, {method:'POST'}); cargarUsuarios(); }
+    async function guardarNuevoUsuario() { const d = { username:document.getElementById('nuevo-user').value, password:document.getElementById('nuevo-pass').value, rol:document.getElementById('nuevo-rol').value, nombreReal:document.getElementById('nuevo-nombre').value, apellido:document.getElementById('nuevo-apellido').value, dni:document.getElementById('nuevo-dni').value, sexo:document.getElementById('nuevo-sexo').value, telefono:document.getElementById('nuevo-telefono').value, fechaNacimiento:document.getElementById('nuevo-nacimiento').value, pais:document.getElementById('nuevo-pais').value, provincia:document.getElementById('nuevo-provincia').value, ciudad:document.getElementById('nuevo-ciudad').value, direccion:document.getElementById('nuevo-direccion').value, activo:true }; await fetch('/api/usuarios', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(d)}); alert("Empleado registrado!"); cargarUsuarios(); }
+    function mostrarFormularioEdicionUsuario(id,user,em,rol,nom,ap,dni,sx,tel,nac,pa,pro,ciu,dir) { document.getElementById('vista-editar-usuario').style.display='block'; document.getElementById('edit-user-id').value=id; document.getElementById('edit-user-name').value=user; document.getElementById('edit-email').value=em; document.getElementById('edit-user-rol').value=rol; document.getElementById('edit-nombre').value=nom; document.getElementById('edit-apellido').value=ap; document.getElementById('edit-dni').value=dni; document.getElementById('edit-sexo').value=sx; document.getElementById('edit-telefono').value=tel; document.getElementById('edit-nacimiento').value=nac; document.getElementById('edit-pais').value=pa; document.getElementById('edit-provincia').value=pro; document.getElementById('edit-ciudad').value=ciu; document.getElementById('edit-direccion').value=dir; }
+    function cancelarEdicionUsuario() { document.getElementById('vista-editar-usuario').style.display='none'; }
+    async function guardarEdicionUsuario() { const id = document.getElementById('edit-user-id').value; const d = { username:document.getElementById('edit-user-name').value, email:document.getElementById('edit-email').value, rol:document.getElementById('edit-user-rol').value, nombreReal:document.getElementById('edit-nombre').value, apellido:document.getElementById('edit-apellido').value, dni:document.getElementById('edit-dni').value, sexo:document.getElementById('edit-sexo').value, telefono:document.getElementById('edit-telefono').value, fechaNacimiento:document.getElementById('edit-nacimiento').value, pais:document.getElementById('edit-pais').value, provincia:document.getElementById('edit-provincia').value, ciudad:document.getElementById('edit-ciudad').value, direccion:document.getElementById('edit-direccion').value }; await fetch(`/api/usuarios/editar/${id}`, {method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(d)}); cancelarEdicionUsuario(); cargarUsuarios(); }
+</script>
+</body>
+</html>
