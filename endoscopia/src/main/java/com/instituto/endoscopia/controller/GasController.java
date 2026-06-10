@@ -1,11 +1,12 @@
 package com.instituto.endoscopia.controller;
 
-import com.instituto.endoscopia.model.GasEstado;
 import com.instituto.endoscopia.model.ConsumoGas;
-import com.instituto.endoscopia.repository.GasEstadoRepository;
+import com.instituto.endoscopia.model.GasEstado;
 import com.instituto.endoscopia.repository.ConsumoGasRepository;
+import com.instituto.endoscopia.service.GasService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -15,62 +16,52 @@ import java.util.List;
 public class GasController {
 
     @Autowired
-    private GasEstadoRepository gasEstadoRepository;
+    private GasService gasService;
 
     @Autowired
     private ConsumoGasRepository consumoGasRepository;
 
     @GetMapping
-    public List<GasEstado> obtenerTodos() {
-        return gasEstadoRepository.findAll();
+    public List<GasEstado> obtenerGases() {
+        return gasService.obtenerEstadoGases();
     }
 
     @PostMapping("/ingreso")
-    public void registrarIngreso(@RequestParam String tipo, @RequestParam Integer llenosRecibidos, @RequestParam Integer vaciosEntregados) {
-        // AQUÍ ESTÁ LA MAGIA: .orElse(new GasEstado())
-        GasEstado gas = gasEstadoRepository.findByTipo(tipo).orElse(new GasEstado(tipo, 0, 0));
-
-        gas.setTipo(tipo);
-        gas.setLlenos((gas.getLlenos() != null ? gas.getLlenos() : 0) + llenosRecibidos);
-
-        int nuevosVacios = (gas.getVacios() != null ? gas.getVacios() : 0) - vaciosEntregados;
-        gas.setVacios(Math.max(nuevosVacios, 0));
-
-        gasEstadoRepository.save(gas);
+    public void registrarIngreso(@RequestParam String tipo,
+                                 @RequestParam Double llenosRecibidos,
+                                 @RequestParam Double vaciosEntregados,
+                                 @RequestParam String fecha) {
+        gasService.registrarIngreso(tipo, llenosRecibidos, vaciosEntregados);
     }
 
     @PostMapping("/consumo")
-    public void registrarConsumo(@RequestParam String tipo, @RequestParam Integer cantidad, @RequestParam String fecha) {
-        // AQUÍ TAMBIÉN
-        GasEstado gas = gasEstadoRepository.findByTipo(tipo).orElse(new GasEstado(tipo, 0, 0));
+    public void consumirGas(@RequestParam String tipo,
+                            @RequestParam Double cantidad,
+                            @RequestParam String fecha) {
 
-        gas.setTipo(tipo);
-        gas.setLlenos(gas.getLlenos() - cantidad);
-        gas.setVacios(gas.getVacios() + cantidad);
-        gasEstadoRepository.save(gas);
+        // 1. Llama al Service pasando los 3 parámetros correctos (tipo, cantidad y fecha como LocalDate)
+        gasService.registrarConsumo(tipo, cantidad, LocalDate.parse(fecha));
 
-        ConsumoGas consumo = new ConsumoGas();
-        consumo.setTipo(tipo);
-        consumo.setCantidad(cantidad);
-        consumo.setFecha(LocalDate.parse(fecha));
-        consumoGasRepository.save(consumo);
+        // 2. Guarda el registro en la tabla específica para el reporte operativo de gases
+        ConsumoGas historial = new ConsumoGas();
+        historial.setTipo(tipo);
+        historial.setCantidad(cantidad);
+        historial.setFecha(LocalDate.parse(fecha));
+        consumoGasRepository.save(historial);
     }
 
     @PostMapping("/ajustar")
-    public void ajustarGasManual(@RequestParam String tipo, @RequestParam Integer llenos, @RequestParam Integer vacios) {
-        // Y AQUÍ TAMBIÉN
-        GasEstado gas = gasEstadoRepository.findByTipo(tipo).orElse(new GasEstado(tipo, 0, 0));
-
-        gas.setTipo(tipo);
-        gas.setLlenos(llenos);
-        gas.setVacios(vacios);
-        gasEstadoRepository.save(gas);
+    public void ajustarGas(@RequestParam String tipo,
+                           @RequestParam Double llenos,
+                           @RequestParam Double vacios) {
+        gasService.ajustarStockGas(tipo, llenos, vacios);
     }
 
     @GetMapping("/reporte")
-    public List<ConsumoGas> obtenerReporte(@RequestParam String inicio, @RequestParam String fin) {
-        LocalDate fechaInicio = LocalDate.parse(inicio);
-        LocalDate fechaFin = LocalDate.parse(fin);
-        return consumoGasRepository.findByFechaGreaterThanEqualAndFechaLessThanEqual(fechaInicio, fechaFin);
+    public List<ConsumoGas> obtenerReporteGases(@RequestParam String inicio, @RequestParam String fin) {
+        return consumoGasRepository.findByFechaBetween(
+                LocalDate.parse(inicio),
+                LocalDate.parse(fin)
+        );
     }
 }

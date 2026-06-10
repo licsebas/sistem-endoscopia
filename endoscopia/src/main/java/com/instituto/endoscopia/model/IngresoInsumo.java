@@ -11,7 +11,9 @@ public class IngresoInsumo {
 
     private Long insumoId;
     private String insumoNombre;
-    private Integer cantidad;
+
+    // CAMBIO: Ahora es Double
+    private Double cantidad;
     private String numeroRemito;
     private LocalDate fechaIngreso = LocalDate.now();
 
@@ -19,20 +21,19 @@ public class IngresoInsumo {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
     public Long getInsumoId() { return insumoId; }
     public void setInsumoId(Long insumoId) { this.insumoId = insumoId; }
+
     public String getInsumoNombre() { return insumoNombre; }
     public void setInsumoNombre(String insumoNombre) { this.insumoNombre = insumoNombre; }
-    public Integer getCantidad() { return cantidad; }
-    public void setCantidad(Integer cantidad) { this.cantidad = cantidad; }
+
+    public Double getCantidad() { return cantidad; }
+    public void setCantidad(Double cantidad) { this.cantidad = cantidad; }
+
     public LocalDate getFechaIngreso() { return fechaIngreso; }
     public void setFechaIngreso(LocalDate fechaIngreso) { this.fechaIngreso = fechaIngreso; }
-    public String getNumeroRemito() {
-        return numeroRemito;
-    }
-    public void setNumeroRemito(String numeroRemito) {
-        this.numeroRemito = numeroRemito;
-    }
 
-
+    public String getNumeroRemito() { return numeroRemito; }
+    public void setNumeroRemito(String numeroRemito) { this.numeroRemito = numeroRemito; }
 }

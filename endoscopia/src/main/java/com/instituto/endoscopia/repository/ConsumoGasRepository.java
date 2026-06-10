@@ -8,6 +8,6 @@ import java.util.List;
 
 @Repository
 public interface ConsumoGasRepository extends JpaRepository<ConsumoGas, Long> {
-    // Esta instrucción es mucho más precisa y segura que el "Between"
-    List<ConsumoGas> findByFechaGreaterThanEqualAndFechaLessThanEqual(LocalDate inicio, LocalDate fin);
+    // Esta línea mágica busca los consumos entre dos fechas para tu reporte
+    List<ConsumoGas> findByFechaBetween(LocalDate inicio, LocalDate fin);
 }

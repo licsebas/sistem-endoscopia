@@ -28,37 +28,33 @@ public class InsumoController {
 
     @PostMapping
     public Insumo crear(@RequestBody Insumo insumo) {
-        // Por defecto, todo insumo nuevo nace "Activo"
         insumo.setActivo(true);
+        if(insumo.getStock() == null) insumo.setStock(0.0);
         return insumoRepository.save(insumo);
     }
 
     @PostMapping("/ingresar/{id}")
     public Insumo ingresarStock(@PathVariable Long id,
-                                @RequestParam Integer cantidad,
+                                @RequestParam Double cantidad, // CAMBIO A DOUBLE
                                 @RequestParam String fecha,
-                                @RequestParam(required = false) String numeroRemito) { // <-- 1. Nuevo parámetro opcional agregado aquí
+                                @RequestParam(required = false) String numeroRemito) {
 
         return insumoRepository.findById(id).map(insumo -> {
-            // 1. Aumentamos el stock del insumo
             insumo.setStock(insumo.getStock() + cantidad);
             Insumo actualizado = insumoRepository.save(insumo);
 
-            // 2. Creamos el registro para el historial
             IngresoInsumo registro = new IngresoInsumo();
             registro.setInsumoId(insumo.getId());
             registro.setInsumoNombre(insumo.getNombre());
             registro.setCantidad(cantidad);
             registro.setFechaIngreso(LocalDate.parse(fecha));
-
-            // <-- 2. Guardamos el número de remito en el historial
             registro.setNumeroRemito(numeroRemito);
 
             ingresoInsumoRepository.save(registro);
-
             return actualizado;
         }).orElse(null);
     }
+
     @GetMapping("/ingresos")
     public List<IngresoInsumo> buscarIngresosPorPeriodo(@RequestParam String inicio, @RequestParam String fin) {
         LocalDate fechaInicio = LocalDate.parse(inicio);
@@ -67,7 +63,7 @@ public class InsumoController {
     }
 
     @PostMapping("/consumir/{id}")
-    public Insumo consumirStock(@PathVariable Long id, @RequestParam Integer cantidad, @RequestParam String fecha) {
+    public Insumo consumirStock(@PathVariable Long id, @RequestParam Double cantidad, @RequestParam String fecha) { // CAMBIO A DOUBLE
         return insumoRepository.findById(id).map(insumo -> {
             insumo.setStock(insumo.getStock() - cantidad);
             Insumo actualizado = insumoRepository.save(insumo);
@@ -89,14 +85,9 @@ public class InsumoController {
         return consumoInsumoRepository.findByFechaConsumoGreaterThanEqualAndFechaConsumoLessThanEqual(fechaInicio, fechaFin);
     }
 
-    // ==========================================================
-    // NUEVOS MÉTODOS PARA EL CATÁLOGO: SUSPENDER Y ELIMINAR REAL
-    // ==========================================================
-
     @PostMapping("/estado/{id}")
     public void cambiarEstado(@PathVariable Long id) {
         insumoRepository.findById(id).ifPresent(insumo -> {
-            // Si estaba Activo (true) pasa a falso, y viceversa
             boolean estadoActual = insumo.getActivo() != null ? insumo.getActivo() : true;
             insumo.setActivo(!estadoActual);
             insumoRepository.save(insumo);
@@ -105,14 +96,11 @@ public class InsumoController {
 
     @DeleteMapping("/{id}")
     public void eliminarFisico(@PathVariable Long id) {
-        // Borra permanentemente el insumo de la base de datos
         insumoRepository.deleteById(id);
     }
 
-    // ==========================================================
-
     @PostMapping("/ajustar/{id}")
-    public Insumo ajustarStock(@PathVariable Long id, @RequestParam Integer cantidad) {
+    public Insumo ajustarStock(@PathVariable Long id, @RequestParam Double cantidad) { // CAMBIO A DOUBLE
         return insumoRepository.findById(id).map(insumo -> {
             insumo.setStock(cantidad);
             return insumoRepository.save(insumo);
@@ -130,7 +118,7 @@ public class InsumoController {
     }
 
     @PostMapping("/modificar-critico/{id}")
-    public void modificarCritico(@PathVariable Long id, @RequestParam Integer nuevoCritico) {
+    public void modificarCritico(@PathVariable Long id, @RequestParam Double nuevoCritico) { // CAMBIO A DOUBLE
         insumoRepository.findById(id).ifPresent(i -> { i.setStockCritico(nuevoCritico); insumoRepository.save(i); });
     }
 }
