@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Gestión Integral - Clínica Endoscopia</title>
+
     <style>
         /* ================= ESTILOS GENERALES ================= */
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f4f7f6; height: 100vh; display: flex; flex-direction: column; }
@@ -36,8 +37,9 @@
         .btn-info { background-color: #3182ce; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
 
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .table-scrollable { max-height: 350px; overflow-y: auto; border-bottom: 1px solid #e2e8f0; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; min-width: 600px; }
-        table th { background-color: #edf2f7; color: #4a5568; text-align: left; padding: 12px; border: 1px solid #e2e8f0; font-size: 13px; text-transform: uppercase; }
+        table th { background-color: #edf2f7; color: #4a5568; text-align: left; padding: 12px; border: 1px solid #e2e8f0; font-size: 13px; text-transform: uppercase; position: sticky; top: 0; z-index: 1; }
         table td { padding: 12px; border: 1px solid #e2e8f0; font-size: 14px; color: #2d3748; vertical-align: top; }
         .categoria-titulo { color: #2b6cb0; margin-top: 25px; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; }
 
@@ -55,26 +57,45 @@
         .ficha-title { color: #2b6cb0; margin: 0; font-size: 22px; }
         .btn-close { background: #e53e3e; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
 
-        /* ================= ESTILOS NUEVOS (TAREAS Y NOVEDADES) ================= */
-        .tarea-tecnica {
-            background-color: #e53e3e; color: white; padding: 14px 18px; margin: 10px 0; border-radius: 6px; cursor: pointer;
-            font-weight: bold; font-size: 15px; user-select: none; transition: 0.3s ease;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.15); display: flex; justify-content: space-between; align-items: center;
-        }
+        /* ================= ESTILOS NUEVOS ================= */
+        .tarea-tecnica { background-color: #e53e3e; color: white; padding: 14px 18px; margin: 10px 0; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 15px; user-select: none; transition: 0.3s ease; box-shadow: 0 3px 6px rgba(0,0,0,0.15); display: flex; justify-content: space-between; align-items: center; }
         .tarea-tecnica::after { content: '❌ Pendiente'; font-size: 13px; background: rgba(255,255,255,0.2); padding: 4px 8px; border-radius: 4px;}
         .tarea-tecnica.completada { background-color: #38a169; text-decoration: line-through; opacity: 0.9; }
         .tarea-tecnica.completada::after { content: '✔️ Verificado'; }
 
-        .observacion-item {
-            padding: 15px; border-bottom: 1px solid #e2e8f0; background-color: #fff;
-            border-left: 5px solid #d69e2e; margin-bottom: 10px; border-radius: 0 6px 6px 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05); font-size: 15px; display: flex; flex-direction: column; gap: 5px;
-        }
-
+        .observacion-item { padding: 15px; border-bottom: 1px solid #e2e8f0; background-color: #fff; border-left: 5px solid #d69e2e; margin-bottom: 10px; border-radius: 0 6px 6px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); font-size: 15px; display: flex; flex-direction: column; gap: 5px; }
         .select-pendiente { background-color: #ffeaea; border: 2px solid #e53e3e !important; color: #c53030; font-weight: bold; }
         .select-ok { background-color: #f0fff4; border: 1px solid #38a169 !important; color: #22543d; font-weight: bold; }
         .select-falla { background-color: #fffaf0; border: 1px solid #dd6b20 !important; color: #c05621; font-weight: bold; }
         .input-individual { margin-bottom: 5px; border-left: 4px solid #3182ce; }
+
+        /* ================= TUBOS DE GAS ANIMADOS (CSS) ================= */
+        .tubo-gas {
+            width: 26px;
+            height: 70px;
+            border-radius: 12px 12px 3px 3px;
+            position: relative;
+            margin: 8px 6px;
+            box-shadow: inset -4px -4px 6px rgba(0,0,0,0.3), 3px 3px 5px rgba(0,0,0,0.3);
+            display: inline-block;
+        }
+        /* Válvula del tubo */
+        .tubo-gas::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 10px;
+            height: 6px;
+            background: #a0aec0;
+            border-radius: 3px 3px 0 0;
+            box-shadow: inset -1px -1px 2px rgba(0,0,0,0.4);
+        }
+        /* Color Lleno (Verde) */
+        .tubo-lleno { background: linear-gradient(90deg, #48bb78 0%, #22543d 100%); }
+        /* Color Vacío (Rojo) */
+        .tubo-vacio { background: linear-gradient(90deg, #f56565 0%, #9b2c2c 100%); }
 
         @media (max-width: 768px) {
             #dashboard-screen { flex-direction: column; overflow-y: auto; }
@@ -109,7 +130,8 @@
         <button id="btn-control" class="menu-btn active" onclick="cambiarPantalla('pantalla-control', 'btn-control')">✅ Control Sala</button>
         <button id="btn-tareas" class="menu-btn" onclick="cambiarPantalla('pantalla-tareas', 'btn-tareas')">📋 Tareas y Novedades</button>
         <button id="btn-inventario" class="menu-btn" onclick="cambiarPantalla('pantalla-inventario', 'btn-inventario')">📦 Inventario</button>
-        <button id="btn-oxigeno" class="menu-btn" onclick="cambiarPantalla('pantalla-oxigeno', 'btn-oxigeno')">💨 Gases Médicos</button>
+        <button id="btn-oxigeno" class="menu-btn" onclick="cambiarPantalla('pantalla-oxigeno', 'btn-oxigeno'); cargarGases();">💨 Gases Médicos</button>
+        <button id="btn-proveedores" class="menu-btn" style="display:none;" onclick="cambiarPantalla('pantalla-proveedores', 'btn-proveedores'); cargarProveedores();">🏢 Proveedores</button>
         <button id="btn-usuarios" class="menu-btn" style="display:none;" onclick="cambiarPantalla('pantalla-usuarios', 'btn-usuarios')">🔐 Usuarios</button>
         <div style="flex-grow: 1;"></div>
         <button class="menu-btn" style="background-color: #e53e3e;" onclick="location.reload()">Cerrar Sesión</button>
@@ -122,11 +144,11 @@
 
         <div class="pantallas-container">
 
+            <!-- PANTALLA TAREAS -->
             <div id="pantalla-tareas" class="pantalla">
                 <div class="grid-2-col">
                     <div class="card">
                         <h2 style="color: #2b6cb0; margin-top: 0; border-bottom: 2px solid #2b6cb0; padding-bottom: 10px;">⚠️ Tareas Generales (Opcional)</h2>
-                        <p style="color: #718096; font-size: 14px;">Ayuda visual para organizar la sala. Estas tareas NO se guardan en la base de datos.</p>
                         <div id="checklist-tecnicos">
                             <div class="tarea-tecnica" onclick="this.classList.toggle('completada')">Acondicionar Camilla</div>
                             <div class="tarea-tecnica" onclick="this.classList.toggle('completada')">Preparar medicación en jeringas</div>
@@ -134,21 +156,18 @@
                             <div class="tarea-tecnica" onclick="this.classList.toggle('completada')">Preparar consentimientos informados</div>
                         </div>
                     </div>
-
                     <div class="card">
                         <h2 style="color: #dd6b20; margin-top: 0; border-bottom: 2px solid #dd6b20; padding-bottom: 10px;">📝 Pizarra de Novedades Activas</h2>
-                        <p style="color: #718096; font-size: 14px;">Gestione aquí las fallas u observaciones reportadas por las técnicas.</p>
                         <div style="display:flex; gap:10px; margin-bottom: 15px; background: #fffaf0; padding: 10px; border-radius: 8px;">
                             <input type="text" id="nueva-observacion" placeholder="Escribir novedad manual aquí..." style="flex:1;">
                             <button class="btn-submit" style="width: auto; margin: 0; background: #dd6b20;" onclick="agregarObservacionManual()">➕ Añadir a pizarra</button>
                         </div>
-
-                        <div id="contenedor-observaciones" style="min-height: 250px; background: #f7fafc; padding: 15px; border-radius: 8px;">
-                        </div>
+                        <div id="contenedor-observaciones" style="min-height: 250px; background: #f7fafc; padding: 15px; border-radius: 8px;"></div>
                     </div>
                 </div>
             </div>
 
+            <!-- PANTALLA USUARIOS -->
             <div id="pantalla-usuarios" class="pantalla">
                 <div id="vista-form-usuarios" class="card">
                     <h3 style="color: #2b6cb0; margin-top: 0;">Administración de Personal</h3>
@@ -160,9 +179,7 @@
                             <div class="form-group"><label class="required">DNI:</label><input type="text" id="nuevo-dni"></div>
                         </div>
                         <div class="grid-3-col">
-                            <div class="form-group"><label class="required">Sexo:</label>
-                                <select id="nuevo-sexo"><option value="Femenino">Femenino</option><option value="Masculino">Masculino</option><option value="Otro">Otro</option></select>
-                            </div>
+                            <div class="form-group"><label class="required">Sexo:</label><select id="nuevo-sexo"><option value="Femenino">Femenino</option><option value="Masculino">Masculino</option><option value="Otro">Otro</option></select></div>
                             <div class="form-group"><label class="required">Teléfono:</label><input type="text" id="nuevo-telefono"></div>
                             <div class="form-group"><label class="required">Nacimiento:</label><input type="date" id="nuevo-nacimiento"></div>
                         </div>
@@ -180,57 +197,11 @@
                             <div class="form-group"><label class="required">Usuario (Login):</label><input type="text" id="nuevo-user"></div>
                             <div class="form-group"><label class="required">Clave:</label><input type="password" id="nuevo-pass"></div>
                             <div class="form-group"><label class="required">Rol:</label>
-                                <select id="nuevo-rol">
-                                    <option value="Técnica">Técnica</option>
-                                    <option value="Administrativa">Administrativa</option>
-                                    <option value="Administrador">Administrador</option>
-                                </select>
+                                <select id="nuevo-rol"><option value="Técnica">Técnica</option><option value="Administrativa">Administrativa</option><option value="Administrador">Administrador</option></select>
                             </div>
                         </div>
                         <button class="btn-submit" style="background-color: #2b6cb0;" onclick="guardarNuevoUsuario()">Registrar Empleado</button>
                     </div>
-
-                    <div id="vista-editar-usuario" class="form-section" style="display: none; border-color: #ed8936; background-color: #fffaf0;">
-                        <h4 style="color: #c05621;">✏️ Modificar Legajo</h4>
-                        <input type="hidden" id="edit-user-id">
-                        <div class="grid-3-col">
-                            <div class="form-group"><label class="required">Nombre:</label><input type="text" id="edit-nombre"></div>
-                            <div class="form-group"><label class="required">Apellido:</label><input type="text" id="edit-apellido"></div>
-                            <div class="form-group"><label class="required">DNI:</label><input type="text" id="edit-dni"></div>
-                        </div>
-                        <div class="grid-3-col">
-                            <div class="form-group"><label class="required">Sexo:</label>
-                                <select id="edit-sexo"><option value="Femenino">Femenino</option><option value="Masculino">Masculino</option><option value="Otro">Otro</option></select>
-                            </div>
-                            <div class="form-group"><label class="required">Teléfono:</label><input type="text" id="edit-telefono"></div>
-                            <div class="form-group"><label class="required">Nacimiento:</label><input type="date" id="edit-nacimiento"></div>
-                        </div>
-                        <div class="grid-3-col">
-                            <div class="form-group"><label class="required">País:</label><input type="text" id="edit-pais"></div>
-                            <div class="form-group"><label class="required">Provincia:</label><input type="text" id="edit-provincia"></div>
-                            <div class="form-group"><label class="required">Ciudad:</label><input type="text" id="edit-ciudad"></div>
-                        </div>
-                        <div class="grid-2-col">
-                            <div class="form-group"><label class="required">Email:</label><input type="email" id="edit-email"></div>
-                            <div class="form-group"><label>Dirección:</label><input type="text" id="edit-direccion"></div>
-                        </div>
-                        <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;">
-                        <div class="grid-2-col">
-                            <div class="form-group"><label class="required">Usuario (Login):</label><input type="text" id="edit-user-name"></div>
-                            <div class="form-group"><label class="required">Rol:</label>
-                                <select id="edit-user-rol">
-                                    <option value="Técnica">Técnica</option>
-                                    <option value="Administrativa">Administrativa</option>
-                                    <option value="Administrador">Administrador</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="grid-2-col">
-                            <button class="btn-submit" style="background-color: #ed8936;" onclick="guardarEdicionUsuario()">Guardar Cambios</button>
-                            <button class="btn-submit" style="background-color: #a0aec0;" onclick="cancelarEdicionUsuario()">Cancelar</button>
-                        </div>
-                    </div>
-
                     <h4>Personal Registrado</h4>
                     <div class="table-responsive">
                         <table>
@@ -241,6 +212,39 @@
                 </div>
             </div>
 
+            <!-- PANTALLA PROVEEDORES -->
+            <div id="pantalla-proveedores" class="pantalla">
+                <div class="card">
+                    <h3 style="color: #2b6cb0; border-bottom: 2px solid #2b6cb0; padding-bottom: 10px;">🏢 Directorio de Proveedores</h3>
+
+                    <div style="background:#f7fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:20px;">
+                        <h4 style="margin-top:0;">➕ Agregar Nuevo Proveedor</h4>
+                        <div class="grid-4-col" style="align-items:end; margin-bottom: 15px;">
+                            <div class="form-group"><label>Empresa:</label><input type="text" id="prov-nombre"></div>
+                            <div class="form-group"><label>CUIT:</label><input type="text" id="prov-cuit"></div>
+                            <div class="form-group"><label>Contacto (Nombre):</label><input type="text" id="prov-contacto"></div>
+                            <div class="form-group"><label>Tel / WhatsApp:</label><input type="text" id="prov-tel"></div>
+                            <div class="form-group"><label>Email:</label><input type="email" id="prov-email"></div>
+                            <div class="form-group"><label>Dirección:</label><input type="text" id="prov-dir"></div>
+                            <div class="form-group"><label>Ciudad:</label><input type="text" id="prov-ciudad"></div>
+                            <div class="form-group"><label>País:</label><input type="text" id="prov-pais" value="Argentina"></div>
+                        </div>
+                        <div style="text-align: right;">
+                            <button class="btn-submit" style="background-color: #2b6cb0; width: auto;" onclick="guardarNuevoProveedor()">💾 Guardar Proveedor</button>
+                        </div>
+                    </div>
+
+                    <h4>Proveedores Registrados</h4>
+                    <div class="table-responsive">
+                        <table>
+                            <thead><tr style="background:#4a5568; color:white;"><th>Empresa / CUIT</th><th>Contacto / Teléfono</th><th>Ciudad / Email</th><th>Estado</th><th>Acción</th></tr></thead>
+                            <tbody id="tabla-proveedores-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANTALLA CONTROL -->
             <div id="pantalla-control" class="pantalla active">
                 <div style="margin-bottom:20px; display:flex; gap:10px; flex-wrap:wrap;">
                     <button id="btn-ctrl-alta" class="btn-submit" style="display:none; width:auto; background:#2d3748;" onclick="mostrarSubCtrl('sub-alta-equipo')">➕ Alta Equipo</button>
@@ -252,9 +256,7 @@
                 <div id="sub-alta-equipo" class="card" style="display:none;">
                     <h3 style="color:#2d3748; border-bottom:2px solid #2d3748; padding-bottom:5px;">➕ Registrar Nuevo Endoscopio</h3>
                     <div class="grid-3-col">
-                        <div class="form-group"><label class="required">Tipo de Equipo:</label>
-                            <select id="eq-tipo"><option value="Gastroscopio">Gastroscopio</option><option value="Colonoscopio">Colonoscopio</option></select>
-                        </div>
+                        <div class="form-group"><label class="required">Tipo de Equipo:</label><select id="eq-tipo"><option value="Gastroscopio">Gastroscopio</option><option value="Colonoscopio">Colonoscopio</option></select></div>
                         <div class="form-group"><label class="required">Modelo:</label><input type="text" id="eq-alias" placeholder="Ej: G-180 o CF-150"></div>
                         <div class="form-group"><label class="required">N° de Serie:</label><input type="text" id="eq-serie" placeholder="N° Serie"></div>
                     </div>
@@ -263,7 +265,6 @@
 
                 <div id="sub-form" class="card" style="display:block;">
                     <h3 style="color:#3182ce; border-bottom:2px solid #3182ce; padding-bottom:10px;">✅ Checklist Pre-Turno</h3>
-
                     <h4>1. Infraestructura y Sala</h4>
                     <div class="grid-4-col" style="background:#f7fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:10px;">
                         <div><label>PC (Sistema):</label><select id="chk-pc" class="select-pendiente" onchange="actualizarColorSelect(this)"><option value="pendiente" disabled selected>🔴 VERIFICAR</option><option value="ok">🟢 OK</option><option value="obs">🔴 Falla</option></select></div>
@@ -299,62 +300,54 @@
                     <h4 style="margin-top:35px; border-top: 2px solid #e2e8f0; padding-top: 20px;">4. Control Físico de Endoscopios</h4>
                     <div class="grid-2-col">
                         <div class="equipo-box">
-                            <label style="color:#2c5282;">🏥 GASTROSCOPIO:</label>
-                            <select id="sel-gastro" style="margin-bottom:10px; border:2px solid #3182ce;"></select>
+                            <label style="color:#2c5282;">🏥 GASTROSCOPIO:</label><select id="sel-gastro" style="margin-bottom:10px; border:2px solid #3182ce;"></select>
                             <div class="grid-2-col">
                                 <div><label>Luz:</label><select id="gastro-luz" class="select-pendiente" onchange="actualizarColorSelect(this)"><option value="pendiente" disabled selected>🔴 VERIFICAR</option><option value="ok">🟢 OK</option><option value="falla">🔴 Falla</option></select></div>
                                 <div><label>Movs:</label><select id="gastro-mov" class="select-pendiente" onchange="actualizarColorSelect(this)"><option value="pendiente" disabled selected>🔴 VERIFICAR</option><option value="ok">🟢 OK</option><option value="falla">🔴 Falla</option></select></div>
                                 <div><label>Fuga:</label><select id="gastro-fuga" class="select-pendiente" onchange="actualizarColorSelect(this)"><option value="pendiente" disabled selected>🔴 VERIFICAR</option><option value="ok">🟢 Negativa</option><option value="falla">🔴 Positiva</option></select></div>
                                 <div><label>Canal:</label><select id="gastro-canal" class="select-pendiente" onchange="actualizarColorSelect(this)"><option value="pendiente" disabled selected>🔴 VERIFICAR</option><option value="ok">🟢 OK</option><option value="falla">🔴 Falla</option></select></div>
                             </div>
-                            <div style="margin-top:10px; display:flex; flex-direction:column;">
-                                <label style="font-size:12px;">Observaciones Individuales del Gastroscopio:</label>
-                                <input type="text" id="gastro-obs-1" class="input-individual" placeholder="1. Escribir falla o detalle aquí...">
-                                <input type="text" id="gastro-obs-2" class="input-individual" placeholder="2. (Opcional)">
-                                <input type="text" id="gastro-obs-3" class="input-individual" placeholder="3. (Opcional)">
-                            </div>
+                            <div style="margin-top:10px; display:flex; flex-direction:column;"><label style="font-size:12px;">Observaciones Individuales del Gastroscopio:</label><input type="text" id="gastro-obs-1" class="input-individual" placeholder="1. Escribir falla o detalle aquí..."><input type="text" id="gastro-obs-2" class="input-individual" placeholder="2. (Opcional)"></div>
                         </div>
 
                         <div class="equipo-box" style="background:#f0fff4; border-color:#c6f6d5;">
-                            <label style="color:#22543d;">🏥 COLONOSCOPIO:</label>
-                            <select id="sel-colono" style="margin-bottom:10px; border:2px solid #38a169;"></select>
+                            <label style="color:#22543d;">🏥 COLONOSCOPIO:</label><select id="sel-colono" style="margin-bottom:10px; border:2px solid #38a169;"></select>
                             <div class="grid-2-col">
                                 <div><label>Luz:</label><select id="colono-luz" class="select-pendiente" onchange="actualizarColorSelect(this)"><option value="pendiente" disabled selected>🔴 VERIFICAR</option><option value="ok">🟢 OK</option><option value="falla">🔴 Falla</option></select></div>
                                 <div><label>Movs:</label><select id="colono-mov" class="select-pendiente" onchange="actualizarColorSelect(this)"><option value="pendiente" disabled selected>🔴 VERIFICAR</option><option value="ok">🟢 OK</option><option value="falla">🔴 Falla</option></select></div>
                                 <div><label>Fuga:</label><select id="colono-fuga" class="select-pendiente" onchange="actualizarColorSelect(this)"><option value="pendiente" disabled selected>🔴 VERIFICAR</option><option value="ok">🟢 Negativa</option><option value="falla">🔴 Positiva</option></select></div>
                                 <div><label>Canal:</label><select id="colono-canal" class="select-pendiente" onchange="actualizarColorSelect(this)"><option value="pendiente" disabled selected>🔴 VERIFICAR</option><option value="ok">🟢 OK</option><option value="falla">🔴 Falla</option></select></div>
                             </div>
-                            <div style="margin-top:10px; display:flex; flex-direction:column;">
-                                <label style="font-size:12px;">Observaciones Individuales del Colonoscopio:</label>
-                                <input type="text" id="colono-obs-1" class="input-individual" placeholder="1. Escribir falla o detalle aquí...">
-                                <input type="text" id="colono-obs-2" class="input-individual" placeholder="2. (Opcional)">
-                                <input type="text" id="colono-obs-3" class="input-individual" placeholder="3. (Opcional)">
-                            </div>
+                            <div style="margin-top:10px; display:flex; flex-direction:column;"><label style="font-size:12px;">Observaciones Individuales del Colonoscopio:</label><input type="text" id="colono-obs-1" class="input-individual" placeholder="1. Escribir falla o detalle aquí..."><input type="text" id="colono-obs-2" class="input-individual" placeholder="2. (Opcional)"></div>
                         </div>
                     </div>
                     <button id="btn-guardar-control" class="btn-submit" style="margin-top:30px; background:#3182ce; padding:15px; font-size:16px;" onclick="guardarTodoElControl()">✔️ FIRMAR Y GUARDAR CONTROL DIARIO</button>
                 </div>
 
                 <div id="sub-historial" class="card" style="display:none;">
-                    <div id="panel-auditoria-turnos" class="panel-auditoria">
-                        <h4>⚠️ Auditoría de Personal (Día de Hoy)</h4>
-                        <div id="audit-contenido">Buscando datos...</div>
-                    </div>
-                    <h3>📜 Historial Diario</h3>
+                    <h3>📜 Historial y Auditoría General</h3>
+
+                    <h4 style="color:#3182ce; border-bottom:1px solid #e2e8f0; padding-bottom:5px;">✅ Planillas de Control de Sala (Equipos e Infraestructura)</h4>
                     <div class="filtros-box">
                         <div><label>Desde:</label><input type="date" id="f-desde"></div>
                         <div><label>Hasta:</label><input type="date" id="f-hasta"></div>
-                        <button class="btn-submit" style="width:auto; background:#3182ce;" onclick="cargarHistorial()">🔍 Filtrar</button>
+                        <button class="btn-submit" style="width:auto; background:#3182ce;" onclick="cargarHistorial()">🔍 Filtrar Auditoría</button>
                     </div>
-                    <div id="tabla-historial" class="table-responsive"></div>
+                    <div id="tabla-historial" class="table-responsive" style="margin-bottom: 30px;"></div>
+
+                    <h4 style="color:#dd6b20; border-bottom:1px solid #e2e8f0; padding-bottom:5px;">💨 Controles Diarios de Gases Médicos (Conteo Físico)</h4>
+                    <div id="tabla-historial-conteo-gases" class="table-responsive table-scrollable"></div>
                 </div>
 
                 <div id="sub-equipos" class="card" style="display:none;">
                     <h3>🛠️ Mantenimiento y Gestión de Equipos</h3>
+                    <button class="btn-submit" style="background:#805ad5; width:auto; margin-bottom:15px;" onclick="generarInformeEquipos()">📊 Generar Informe de Todos los Equipos</button>
+                    <div id="informe-equipos-container" style="display:none; margin-bottom: 20px;"></div>
                     <div id="lista-equipos" class="table-responsive"></div>
                 </div>
             </div>
 
+            <!-- PANTALLA INVENTARIO -->
             <div id="pantalla-inventario" class="pantalla">
                 <div style="margin-bottom: 25px; display: flex; gap: 8px; flex-wrap: wrap;">
                     <button id="btn-inv-alta" class="btn-submit" style="display:none; margin-top:0; width: auto; background-color: #2d3748; font-size: 12px; padding: 8px;" onclick="mostrarSubInv('sub-alta')">1. Listado de Insumos (Catálogo)</button>
@@ -362,6 +355,7 @@
                     <button class="btn-submit" style="margin-top:0; width: auto; background-color: #e53e3e; font-size: 12px; padding: 8px;" onclick="mostrarSubInv('sub-consumo')">3. Bajas (Consumo / Kits)</button>
                     <button class="btn-submit" style="margin-top:0; width: auto; background-color: #d69e2e; font-size: 12px; padding: 8px;" onclick="mostrarSubInv('sub-stock'); cargarInsumos();">4. Stock Actual</button>
                     <button class="btn-submit" style="margin-top:0; width: auto; background-color: #805ad5; font-size: 12px; padding: 8px;" onclick="mostrarSubInv('sub-ingresos-periodo')">5. Reportes</button>
+                    <button class="btn-submit" style="margin-top:0; width: auto; background-color: #2b6cb0; font-size: 12px; padding: 8px;" onclick="mostrarSubInv('sub-precios'); dibujarListaPrecios();">6. Consulta de Precios</button>
                 </div>
 
                 <div id="sub-alta" class="card sub-inv" style="display:none;">
@@ -372,18 +366,15 @@
 
                     <div id="panel-nuevo-insumo" style="display:none; background:#f7fafc; padding:15px; border:1px solid #e2e8f0; border-radius:8px; margin-bottom:20px;">
                         <h4 style="margin-top:0; color:#2b6cb0;">Registrar Nuevo Elemento</h4>
-                        <div class="grid-3-col" style="align-items:end;">
+                        <div class="grid-4-col" style="align-items:end;">
                             <div class="form-group"><label>Nombre Insumo:</label><input type="text" id="alta-nombre"></div>
-                            <div class="form-group"><label>Límite Crítico (Alerta):</label><input type="number" id="alta-critico" step="0.01"></div>
+                            <div class="form-group"><label>Precio Unitario ($):</label><input type="number" id="alta-precio" step="0.01" value="0.00"></div>
+                            <div class="form-group"><label>Límite Crítico:</label><input type="number" id="alta-critico" step="0.01"></div>
                             <div class="form-group"><label>Categoría:</label>
-                                <select id="alta-categoria">
-                                    <option value="Medicamentos">Medicamentos</option>
-                                    <option value="Descartables">Descartables</option>
-                                    <option value="Insumos de Alto Costo">Insumos de Alto Costo</option>
-                                </select>
+                                <select id="alta-categoria"><option value="Medicamentos">Medicamentos</option><option value="Descartables">Descartables</option><option value="Insumos de Alto Costo">Insumos de Alto Costo</option></select>
                             </div>
                         </div>
-                        <div style="display:flex; gap:10px; justify-content:flex-end;">
+                        <div style="display:flex; gap:10px; justify-content:flex-end; margin-top: 15px;">
                             <button class="btn-submit" style="width:auto; background-color: #a0aec0;" onclick="document.getElementById('panel-nuevo-insumo').style.display='none'">Cancelar</button>
                             <button class="btn-submit" style="width:auto; background-color: #2b6cb0;" onclick="funcionAltaProducto()">Guardar en Catálogo</button>
                         </div>
@@ -391,15 +382,7 @@
 
                     <div class="table-responsive">
                         <table>
-                            <thead>
-                            <tr style="background:#2d3748; color:white;">
-                                <th>Nombre del Insumo</th>
-                                <th>Categoría</th>
-                                <th style="text-align:center;">Mínimo</th>
-                                <th style="text-align:center;">Estado</th>
-                                <th style="text-align:center;">Acciones</th>
-                            </tr>
-                            </thead>
+                            <thead><tr style="background:#2d3748; color:white;"><th>Nombre del Insumo</th><th>Categoría</th><th style="text-align:center;">Mínimo</th><th style="text-align:center;">Estado</th><th style="text-align:center;">Acciones</th></tr></thead>
                             <tbody id="tabla-catalogo-insumos"></tbody>
                         </table>
                     </div>
@@ -407,10 +390,16 @@
 
                 <div id="sub-ingreso" class="card sub-inv" style="display:block;">
                     <h3>Ingreso Masivo de Stock (Remito / Altas)</h3>
+
                     <div class="form-group" style="background:#edf2f7; padding:15px; border-radius:8px; margin-bottom:20px; border:1px dashed #cbd5e0;">
-                        <label style="color:#2b6cb0;">N° de Remito / Factura (Opcional):</label>
-                        <input type="text" id="remito-numero" placeholder="Ej: 0001-00001234">
+                        <div class="grid-4-col">
+                            <div><label style="color:#2b6cb0;">N° de Remito (Físico):</label><input type="text" id="remito-numero" placeholder="Ej: R-0001-1234"></div>
+                            <div><label style="color:#38a169;">N° de Factura (Precios):</label><input type="text" id="factura-numero" placeholder="Ej: F-0001-5678"></div>
+                            <div><label style="color:#38a169;">Fecha de Factura:</label><input type="date" id="factura-fecha"></div>
+                            <div><label style="color:#dd6b20;">Proveedor:</label><select id="factura-proveedor" style="border: 2px solid #dd6b20;"><option value="">-- Seleccionar --</option></select></div>
+                        </div>
                     </div>
+
                     <div class="form-group">
                         <label>Seleccionar Insumo:</label>
                         <input type="text" id="ingreso-select" list="lista-insumos" autocomplete="off" placeholder="Escriba para buscar insumo..." style="width: 100%; padding: 8px;">
@@ -418,8 +407,9 @@
                     </div>
                     <div class="form-group" style="display:flex; gap:10px;">
                         <div style="flex:1"><label>Cantidad:</label><input type="number" id="ingreso-cantidad" min="0.01" step="0.01"></div>
+                        <div style="flex:1"><label style="color:#38a169;">Precio Unit. ($):</label><input type="number" id="ingreso-precio" min="0" step="0.01" placeholder="Ej: 1500.50"></div>
                         <div style="flex:1"><label class="required">Fecha Ingreso:</label><input type="date" id="ingreso-fecha"></div>
-                        <div style="flex:1"><label>Vencimiento (Opcional):</label><input type="month" id="ingreso-vto"></div>
+                        <div style="flex:1"><label>Vto (Opcional):</label><input type="month" id="ingreso-vto"></div>
                     </div>
                     <button class="btn-submit" style="background-color: #4a5568;" onclick="agregarItemAlRemito()">Añadir a la lista de Ingreso</button>
 
@@ -446,10 +436,7 @@
                     <hr style="border: 0; border-top: 1px solid #cbd5e0; margin: 25px 0;">
 
                     <h4 style="color:#2d3748;">O Carga Manual Individual</h4>
-                    <div class="form-group">
-                        <label>Seleccionar Insumo:</label>
-                        <input type="text" id="consumo-select" list="lista-insumos" autocomplete="off" placeholder="Escriba para buscar insumo..." style="width: 100%; padding: 8px;">
-                    </div>
+                    <div class="form-group"><label>Seleccionar Insumo:</label><input type="text" id="consumo-select" list="lista-insumos" autocomplete="off" placeholder="Escriba para buscar insumo..." style="width: 100%; padding: 8px;"></div>
                     <div class="grid-2-col" style="align-items:end;">
                         <div><label>Cantidad a descontar:</label><input type="number" id="consumo-cantidad" min="0.01" step="0.01"></div>
                         <button class="btn-submit" onclick="agregarItemAlConsumo()" style="background:#ed8936; margin:0;">Añadir a la lista de Baja</button>
@@ -484,6 +471,10 @@
                                 <label style="color:#2b6cb0;">1. Reporte General (Todos los insumos)</label>
                                 <button class="btn-submit" style="background:#3182ce; margin-top:5px;" onclick="generarReporte(false)">📊 Generar General</button>
                             </div>
+                            <div style="flex:1; min-width:250px; margin-top: 15px;">
+                                <label style="color:#805ad5;">3. Auditoría Completa de Personal</label>
+                                <button class="btn-submit" style="background:#805ad5; margin-top:5px;" onclick="generarReporteAuditoriaCompleto()">🧾 Ver Ingresos y Egresos por Usuario</button>
+                            </div>
                             <div style="flex:2; min-width:300px;">
                                 <label style="color:#2b6cb0;">2. Reporte Individual (Insumo específico)</label>
                                 <div style="display:flex; gap:10px;">
@@ -497,134 +488,213 @@
                     <div id="contenedor-reporte-resultados" style="display:none; margin-top:25px;">
                         <h4 id="titulo-tipo-reporte" style="color:#2d3748; background:#ebf8ff; padding:10px; border-radius:6px; border-left:4px solid #3182ce;">Resultados</h4>
                         <div id="tabla-reporte-consolidado" class="table-responsive"></div>
+                        <button class="btn-submit" style="background:#38a169; width:auto; margin-top:15px;" onclick="descargarExcel('tabla-reporte-consolidado', 'Reporte_Movimientos')">📥 Descargar a Excel</button>
                     </div>
+                </div>
+
+                <div id="sub-precios" class="card sub-inv" style="display:none;">
+                    <h3 style="color:#2d3748; border-bottom:2px solid #e2e8f0; padding-bottom:10px;">💰 Consulta de Precios y Valorización</h3>
+                    <div style="display:flex; justify-content:flex-end; margin-bottom:15px;">
+                        <button class="btn-submit" style="background:#38a169; width:auto; margin:0;" onclick="descargarExcel('tabla-precios-container', 'Lista_De_Precios')">📥 Descargar Lista a Excel</button>
+                    </div>
+                    <div id="tabla-precios-container" class="table-responsive"></div>
                 </div>
             </div>
 
+            <!-- MODULO GASES MÉDICOS CON DIBUJOS DE TUBOS REALES -->
             <div id="pantalla-oxigeno" class="pantalla">
                 <div style="margin-bottom: 25px; display: flex; gap: 8px; flex-wrap: wrap;">
-                    <button class="btn-submit" style="margin-top:0; width: auto; background-color: #4a5568; font-size: 12px; padding: 8px;" onclick="mostrarSubGas('sub-gas-estadisticas'); cargarGases();">1. ESTADO DE SALA (PANEL CONTROL)</button>
-                    <button class="btn-submit" style="margin-top:0; width: auto; background-color: #38b2ac; font-size: 12px; padding: 8px;" onclick="mostrarSubGas('sub-gas-ingreso')">2. Recepción / Entrega Proveedor</button>
-                    <button class="btn-submit" style="margin-top:0; width: auto; background-color: #e53e3e; font-size: 12px; padding: 8px;" onclick="mostrarSubGas('sub-gas-consumo')">3. Bajas (Tubos Vaciados)</button>
+                    <button class="btn-submit" style="margin-top:0; width: auto; background-color: #dd6b20; font-size: 12px; padding: 8px;" onclick="mostrarSubGas('sub-gas-conteo'); cargarGases();">1. TÉCNICAS: Conteo Físico</button>
+                    <button class="btn-submit" style="margin-top:0; width: auto; background-color: #38b2ac; font-size: 12px; padding: 8px;" onclick="mostrarSubGas('sub-gas-ingreso')">2. ADMIN: Compras (Facturas)</button>
+                    <button class="btn-submit" style="margin-top:0; width: auto; background-color: #2b6cb0; font-size: 12px; padding: 8px;" onclick="mostrarSubGas('sub-gas-calculadora');">3. ADMIN: Calculadora e Historial</button>
                 </div>
 
-                <div id="sub-gas-estadisticas" class="card sub-gas" style="display: block;">
-                    <h3 style="border-bottom: 2px solid #2d3748; padding-bottom: 10px;">📋 Panel Rápido: ¿Qué necesito pedir?</h3>
-                    <div id="panel-estado-gases-dinamico" style="margin-bottom: 20px;"></div>
-                    <div id="auditoria-tubos" style="margin-bottom: 30px;"></div>
+                <!-- 1. CONTEO FISICO (TÉCNICAS) -->
+                <div id="sub-gas-conteo" class="card sub-gas" style="display: block;">
+                    <h3 style="border-bottom: 2px solid #2d3748; padding-bottom: 10px;">📋 Control Visual de Tubos en Sala</h3>
 
-                    <div id="panel-correccion-admin" style="display:none; background:#fffaf0; border:2px dashed #ed8936; padding:15px; border-radius:8px; margin-bottom:30px;">
-                        <h4 style="margin-top:0; color:#dd6b20;">🛠️ Corrección Manual de Inventario Físico (Solo Administrador)</h4>
-                        <div class="grid-4-col" style="align-items:end;">
-                            <div class="form-group"><label>Tipo de Tubo:</label><select id="ajuste-gas-tipo"></select></div>
-                            <div class="form-group"><label>Llenos Reales (Acepta Dec.):</label><input type="number" id="ajuste-gas-llenos" step="0.01" value="0"></div>
-                            <div class="form-group"><label>Vacíos Reales (Acepta Dec.):</label><input type="number" id="ajuste-gas-vacios" step="0.01" value="0"></div>
-                            <button class="btn-submit" style="background-color: #dd6b20; margin-bottom: 15px;" onclick="forzarAjusteGas()">Pisar y Corregir Stock</button>
+                    <!-- DASHBOARD DE TUBOS -->
+                    <div style="background:#ebf8ff; padding:15px; border-radius:8px; border:1px solid #90cdf4; margin-bottom:20px;">
+                        <h4 style="margin-top:0; color:#2b6cb0;">📊 Tablero de Estado (Último Control)</h4>
+                        <div id="info-ultimo-conteo" style="margin-bottom: 15px; font-size:14px; color:#4a5568;">Cargando...</div>
+
+                        <div class="grid-2-col" style="align-items: center;">
+                            <div style="text-align: center; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                                <h4 style="margin-top:0; color:#3182ce;">Oxígeno (O2)</h4>
+
+                                <!-- CONTENEDOR DE TUBOS O2 -->
+                                <div id="wrapper-chart-o2" style="display: flex; flex-wrap: wrap; justify-content: center; min-height: 120px; align-items: center; padding: 10px;">
+                                    <!-- Aquí se inyectan los tubitos por Javascript -->
+                                </div>
+
+                                <!-- INFO DE CANTIDAD Y PORCENTAJE -->
+                                <div id="info-extra-o2" style="margin-top: 5px; color:#4a5568; font-size: 14px;"></div>
+                                <div id="alerta-o2" style="margin-top: 5px; font-size: 15px; font-weight: bold; min-height: 20px;"></div>
+                            </div>
+                            <div style="text-align: center; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                                <h4 style="margin-top:0; color:#4a5568;">Dióxido de Carbono (CO2)</h4>
+
+                                <!-- CONTENEDOR DE TUBOS CO2 -->
+                                <div id="wrapper-chart-co2" style="display: flex; flex-wrap: wrap; justify-content: center; min-height: 120px; align-items: center; padding: 10px;">
+                                    <!-- Aquí se inyectan los tubitos por Javascript -->
+                                </div>
+
+                                <!-- INFO DE CANTIDAD Y PORCENTAJE -->
+                                <div id="info-extra-co2" style="margin-top: 5px; color:#4a5568; font-size: 14px;"></div>
+                                <div id="alerta-co2" style="margin-top: 5px; font-size: 15px; font-weight: bold; min-height: 20px;"></div>
+                            </div>
                         </div>
                     </div>
 
-                    <h3 style="border-top: 1px solid #e2e8f0; padding-top: 10px; margin-top: 30px;">📊 Estimación de Consumo por Período</h3>
-                    <div class="filtros-box" style="background: #f7fafc; border-color: #e2e8f0;">
-                        <div style="flex-grow:1;"><label>Desde:</label><input type="date" id="analisis-gas-inicio"></div>
-                        <div style="flex-grow:1;"><label>Hasta:</label><input type="date" id="analisis-gas-fin"></div>
-                        <button class="btn-submit" style="width:auto; background-color: #2d3748;" onclick="generarReporteGases()">🔍 Ver Consumo</button>
+                    <div style="background:#fffaf0; border:2px dashed #dd6b20; padding:20px; border-radius:8px; margin-bottom:30px;">
+
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+                            <h4 style="margin:0; color:#dd6b20;">🔄 Registrar Nuevo Conteo Físico</h4>
+                            <button class="btn-submit" style="width:auto; margin:0; background:#a0aec0; padding:6px 12px; font-size:12px;" onclick="configurarTotalesGases()">⚙️ Configurar Cantidad Total</button>
+                        </div>
+
+                        <p id="texto-alerta-totales" style="color:#c53030; font-weight:bold; font-size:14px; margin-bottom:15px;">⚠️ Atención: La suma de tubos de Oxígeno siempre debe ser 11 y la de CO2 siempre debe ser 4.</p>
+
+                        <div class="grid-2-col">
+                            <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #e2e8f0;">
+                                <h4 id="titulo-conteo-o2" style="margin-top:0; color:#3182ce; text-align:center;">OXÍGENO (O2) - [Total: 11]</h4>
+                                <div class="grid-2-col">
+                                    <div><label>Tubos LLENOS:</label><input type="number" id="conteo-o2-llenos" value="0" min="0"></div>
+                                    <div><label>Tubos VACÍOS:</label><input type="number" id="conteo-o2-vacios" value="0" min="0"></div>
+                                </div>
+                            </div>
+                            <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #e2e8f0;">
+                                <h4 id="titulo-conteo-co2" style="margin-top:0; color:#4a5568; text-align:center;">DIÓXIDO DE CARBONO (CO2) - [Total: 4]</h4>
+                                <div class="grid-2-col">
+                                    <div><label>Tubos LLENOS:</label><input type="number" id="conteo-co2-llenos" value="0" min="0"></div>
+                                    <div><label>Tubos VACÍOS:</label><input type="number" id="conteo-co2-vacios" value="0" min="0"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top:15px;">
+                            <label class="required">Fecha del Control Visual:</label>
+                            <input type="date" id="conteo-fecha-gas">
+                        </div>
+                        <div style="text-align: right; margin-top: 15px;">
+                            <button class="btn-submit" style="background-color: #dd6b20; width: auto; padding: 12px 25px; font-size: 16px;" onclick="guardarConteoGases()">💾 Firmar y Guardar Conteo</button>
+                        </div>
                     </div>
-                    <div class="table-responsive">
-                        <h4 style="color: #3182ce;">Oxígeno (O2)</h4>
-                        <table><thead><tr style="background:#3182ce; color:white;"><th>Capacidad de Tubo</th><th style="text-align:center;">Tubos Vaciados</th><th style="text-align:center;">Volumen Gastado</th></tr></thead><tbody id="tabla-reporte-o2-body"></tbody></table>
-                        <h4 style="color: #4a5568; margin-top: 25px;">Dióxido de Carbono (CO2)</h4>
-                        <table><thead><tr style="background:#4a5568; color:white;"><th>Capacidad de Tubo</th><th style="text-align:center;">Tubos Vaciados</th><th style="text-align:center;">Peso Gastado</th></tr></thead><tbody id="tabla-reporte-co2-body"></tbody></table>
+
+                    <h4 style="margin-top:30px; border-top: 1px solid #e2e8f0; padding-top: 20px;">📅 Historial Completo de Controles de Sala</h4>
+                    <div class="table-responsive table-scrollable">
+                        <table>
+                            <thead><tr style="background:#4a5568; color:white;"><th>Fecha</th><th>Técnica</th><th>O2 (Llenos/Vacíos)</th><th>CO2 (Llenos/Vacíos)</th></tr></thead>
+                            <tbody id="tabla-tecnicas-historial-gases"></tbody>
+                        </table>
                     </div>
                 </div>
 
+                <!-- 2. RECEPCIÓN DE PROVEEDOR (VOLUMEN) -->
                 <div id="sub-gas-ingreso" class="card sub-gas" style="display: none;">
-                    <div id="vista-form-gas-ingreso">
-                        <h3>🚚 Recepción de Tubos</h3>
-                        <div class="grid-2-col">
-                            <div class="form-group"><label>Tamaño / Tipo de Tubo:</label><select id="gas-ingreso-tipo"></select></div>
-                            <div class="form-group"><label class="required">Fecha de Recepción:</label><input type="date" id="gas-ingreso-fecha"></div>
-                        </div>
-                        <div class="grid-2-col">
-                            <div class="form-group"><label style="color:#38a169;">LLENOS Recibidos (Entran a clínica):</label><input type="number" step="0.01" id="gas-ingreso-llenos" value="0"></div>
-                            <div class="form-group"><label style="color:#e53e3e;">VACÍOS Devueltos (Se lleva el proveedor):</label><input type="number" step="0.01" id="gas-ingreso-vacios" value="0"></div>
-                        </div>
-                        <button class="btn-submit" style="background-color: #38b2ac;" onclick="agregarGasAlRemito()">➕ Añadir a la lista de movimiento</button>
+                    <h3>🚚 Recepción de Facturas/Remitos de Gas</h3>
+                    <p style="color:#718096; font-size:14px;">Registra las compras de gas ingresando el Volumen total (m3 o Kg) que figura en la factura.</p>
 
-                        <div class="table-responsive">
-                            <table style="margin-top:20px;">
-                                <thead><tr><th>Fecha</th><th>Tipo de Tubo</th><th>Entran Llenos</th><th>Salen Vacíos</th><th>Quitar</th></tr></thead>
-                                <tbody id="tabla-remito-gas-body"></tbody>
-                            </table>
+                    <div class="form-group" style="background:#edf2f7; padding:15px; border-radius:8px; margin-bottom:20px; border:1px dashed #cbd5e0;">
+                        <div class="grid-4-col">
+                            <div><label>N° Remito:</label><input type="text" id="gas-remito" placeholder="Ej: R-0001"></div>
+                            <div><label>N° Factura:</label><input type="text" id="gas-factura" placeholder="Ej: F-1234"></div>
+                            <div><label class="required">Fecha Compra:</label><input type="date" id="gas-fecha"></div>
+                            <div><label>Proveedor:</label><select id="gas-proveedor"></select></div>
                         </div>
-                        <button class="btn-submit" style="background-color: #2c7a7b; margin-top: 15px;" onclick="confirmarIngresoGasMasivo()">💾 Confirmar Movimiento Completo</button>
                     </div>
-                    <div id="vista-exito-gas-ingreso" class="pantalla-exito">
-                        <h2 style="color:#2f855a;">¡Movimiento Guardado!</h2>
-                        <button class="btn-submit" onclick="nuevoRegistroGasIngreso()" style="width:auto; padding:10px 20px; background:#38a169;">Registrar otro movimiento</button>
+
+                    <div class="grid-3-col">
+                        <div class="form-group">
+                            <label>Tipo de Gas:</label>
+                            <select id="gas-ingreso-tipo"><option value="O2">Oxígeno (O2)</option><option value="CO2">Dióxido de Carbono (CO2)</option></select>
+                        </div>
+                        <div class="form-group"><label>Volumen Total (m3 o Kg):</label><input type="number" step="0.01" id="gas-ingreso-volumen" value="0"></div>
+                        <div class="form-group"><label>Precio Total ($):</label><input type="number" step="0.01" id="gas-ingreso-precio" value="0"></div>
                     </div>
+                    <button class="btn-submit" style="background-color: #38b2ac;" onclick="agregarGasAlRemito()">➕ Añadir a la lista de compra</button>
+
+                    <div class="table-responsive">
+                        <table style="margin-top:20px;">
+                            <thead><tr><th>Tipo de Gas</th><th>Volumen Comprado</th><th>Precio Total ($)</th><th>Quitar</th></tr></thead>
+                            <tbody id="tabla-remito-gas-body"></tbody>
+                        </table>
+                    </div>
+                    <button class="btn-submit" style="background-color: #2c7a7b; margin-top: 15px;" onclick="confirmarIngresoGasMasivo()">💾 Confirmar y Guardar Ingreso</button>
+
+                    <h4 style="margin-top:30px; border-top: 1px solid #e2e8f0; padding-top: 20px;">📜 Historial de Facturas de Gases</h4>
+                    <div id="tabla-historial-compras-gases" class="table-responsive table-scrollable"></div>
                 </div>
 
-                <div id="sub-gas-consumo" class="card sub-gas" style="display: none;">
-                    <h3>💨 Registro de Tubo Vaciado</h3>
-                    <div class="form-group"><label>Tamaño / Tipo de Tubo que se vació:</label><select id="gas-consumo-tipo"></select></div>
+                <!-- 3. CALCULADORA DE CONSUMO POR DIFERENCIA E HISTORIAL -->
+                <div id="sub-gas-calculadora" class="card sub-gas" style="display: none;">
                     <div class="grid-2-col">
-                        <div class="form-group"><label>Cantidad de tubos vaciados:</label><input type="number" step="0.01" id="gas-consumo-cant" value="1" min="0.01"></div>
-                        <div class="form-group"><label class="required">Fecha del vaciado:</label><input type="date" id="gas-consumo-fecha"></div>
+                        <div style="background:#f0fff4; padding:20px; border-radius:8px; border:1px solid #9ae6b4;">
+                            <h4 style="margin-top:0; color:#2f855a;">📌 1. Registrar Stock Inicial del Mes</h4>
+                            <p style="color:#718096; font-size:13px;">Determina con cuánto volumen arrancas el periodo.</p>
+                            <div class="form-group"><label>Gas:</label><select id="stock-ini-gas"><option value="O2">Oxígeno (m3)</option><option value="CO2">CO2 (Kg)</option></select></div>
+                            <div class="form-group"><label>Volumen Inicial Físico (m3 o Kg):</label><input type="number" id="stock-ini-vol" step="0.01" value="0"></div>
+                            <div class="form-group"><label>Periodo (Mes/Año):</label><input type="month" id="stock-ini-mes"></div>
+                            <button class="btn-submit" style="background:#38a169;" onclick="guardarStockInicialGas()">💾 Guardar Stock Inicial</button>
+
+                            <h5 style="margin-top:15px; margin-bottom:5px; color:#2f855a;">Últimos Stocks Iniciales:</h5>
+                            <div id="tabla-historial-stock-inicial" style="font-size:12px;"></div>
+                        </div>
+
+                        <div style="background:#ebf8ff; padding:20px; border-radius:8px; border:1px solid #90cdf4;">
+                            <h4 style="margin-top:0; color:#2b6cb0;">🧮 2. Calcular y Guardar Consumo</h4>
+                            <p style="color:#718096; font-size:13px;">Fórmula: Inicial + Compras - Final = Consumo</p>
+                            <div class="form-group"><label>Gas a calcular:</label><select id="calc-gas-tipo"><option value="O2">Oxígeno (m3)</option><option value="CO2">CO2 (Kg)</option></select></div>
+                            <div class="grid-2-col" style="gap:10px;">
+                                <div><label>Mes a cerrar (Periodo):</label><input type="month" id="calc-mes"></div>
+                                <div><label>Fecha de Medición Final:</label><input type="date" id="calc-fecha-final"></div>
+                            </div>
+                            <div class="grid-3-col" style="gap:10px; margin-top: 15px;">
+                                <div><label>1. Inicial:</label><input type="number" id="calc-inicial" step="0.01" value="0"></div>
+                                <div><label>2. Compras:</label><input type="number" id="calc-compras" step="0.01" value="0"></div>
+                                <div><label>3. Final (Medido):</label><input type="number" id="calc-final" step="0.01" value="0"></div>
+                            </div>
+                            <button class="btn-submit" style="background:#2b6cb0; margin-top:15px;" onclick="calcularYGuardarConsumoGas()">✅ Calcular y Registrar Consumo</button>
+                        </div>
                     </div>
-                    <button class="btn-submit" style="background-color: #e53e3e;" onclick="registrarConsumoGas()">Confirmar Baja</button>
+
+                    <h3 style="margin-top:30px; border-top: 1px solid #e2e8f0; padding-top:20px;">📜 Historial Permanente de Consumos (Cierres)</h3>
+                    <div class="table-responsive table-scrollable">
+                        <table>
+                            <thead><tr style="background:#4a5568; color:white;"><th>Periodo / Mes</th><th>Fecha Cierre</th><th>Usuario</th><th>Gas</th><th>Stock Inicial</th><th>Compras (Ingresos)</th><th>Stock Final Físico</th><th>VOLUMEN CONSUMIDO</th></tr></thead>
+                            <tbody id="tabla-historial-gases"></tbody>
+                        </table>
+                    </div>
                 </div>
+
             </div>
 
         </div>
     </div>
 </div>
 
-<div id="modal-kits" class="modal-overlay">
-    <div class="modal-content" style="max-width:600px;">
-        <div class="ficha-header">
-            <h2 class="ficha-title">⚙️ Configurar Kits de Endoscopia</h2>
-            <button class="btn-close" onclick="document.getElementById('modal-kits').style.display='none'">X Cerrar</button>
-        </div>
-        <p style="font-size:14px; color:#4a5568;">Defina aquí qué insumos se utilizan por cada paciente en estos procedimientos. El sistema los guardará para agilizar el descuento diario de stock.</p>
-        <div class="form-group">
-            <label>Seleccionar Kit a configurar:</label>
-            <select id="config-kit-select" onchange="dibujarKitActual()" style="border:2px solid #3182ce; font-weight:bold;">
-                <option value="Gastroscopia">Gastroscopia</option>
-                <option value="Colonoscopia">Colonoscopia</option>
-                <option value="Polipectomía">Polipectomía</option>
-                <option value="Mucosectomía">Mucosectomía</option>
-                <option value="Dilatación Esofágica">Dilatación Esofágica</option>
-                <option value="Dilatación Colónica">Dilatación Colónica</option>
-                <option value="Banding">Banding</option>
-            </select>
-        </div>
-        <div class="grid-2-col" style="background:#f7fafc; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #e2e8f0;">
-            <div><label>Buscar Insumo:</label><input type="text" id="config-kit-insumo" list="lista-insumos"></div>
-            <div>
-                <label>Cantidad (Permite decimales):</label>
-                <div style="display:flex; gap:10px;">
-                    <input type="number" id="config-kit-cant" value="1" min="0.01" step="0.01" style="flex:1;">
-                    <button class="btn-submit" style="background:#38a169; margin:0; flex:1;" onclick="agregarInsumoAKit()">+ Agregar</button>
-                </div>
-            </div>
-        </div>
-        <div class="table-responsive">
-            <table>
-                <thead><tr style="background:#2d3748; color:white;"><th>Insumo incluido en este Kit</th><th style="text-align:center;">Cant x Paciente</th><th style="text-align:center;">Quitar</th></tr></thead>
-                <tbody id="tabla-config-kit"></tbody>
-            </table>
-        </div>
-    </div>
-</div>
+<!-- Modales Varios -->
+<div id="modal-kits" class="modal-overlay"><div class="modal-content" style="max-width:600px;"><div class="ficha-header"><h2 class="ficha-title">⚙️ Configurar Kits de Endoscopia</h2><button class="btn-close" onclick="document.getElementById('modal-kits').style.display='none'">X Cerrar</button></div><div class="form-group"><label>Seleccionar Kit a configurar:</label><select id="config-kit-select" onchange="dibujarKitActual()" style="border:2px solid #3182ce; font-weight:bold;"><option value="Gastroscopia">Gastroscopia</option><option value="Colonoscopia">Colonoscopia</option><option value="Polipectomía">Polipectomía</option><option value="Mucosectomía">Mucosectomía</option><option value="Dilatación Esofágica">Dilatación Esofágica</option><option value="Dilatación Colónica">Dilatación Colónica</option><option value="Banding">Banding</option></select></div><div class="grid-2-col" style="background:#f7fafc; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #e2e8f0;"><div><label>Buscar Insumo:</label><input type="text" id="config-kit-insumo" list="lista-insumos"></div><div><label>Cantidad (Permite decimales):</label><div style="display:flex; gap:10px;"><input type="number" id="config-kit-cant" value="1" min="0.01" step="0.01" style="flex:1;"><button class="btn-submit" style="background:#38a169; margin:0; flex:1;" onclick="agregarInsumoAKit()">+ Agregar</button></div></div></div><div class="table-responsive"><table><thead><tr style="background:#2d3748; color:white;"><th>Insumo incluido en este Kit</th><th style="text-align:center;">Cant x Paciente</th><th style="text-align:center;">Quitar</th></tr></thead><tbody id="tabla-config-kit"></tbody></table></div></div></div>
 
+<!-- NUEVA FICHA DE EQUIPO CON CAJA DE COMENTARIOS DE REPARACIÓN -->
 <div id="modal-ficha-equipo" class="modal-overlay">
     <div class="modal-content">
         <div class="ficha-header">
             <h2 class="ficha-title" id="ficha-titulo">Ficha Clínica del Equipo</h2>
             <button class="btn-close" onclick="document.getElementById('modal-ficha-equipo').style.display='none'">X Cerrar</button>
         </div>
+
         <h4 style="color:#dd6b20; border-bottom:1px solid #eee; padding-bottom:5px;">🛠️ Historial de Reparaciones / Service</h4>
-        <ul id="ficha-reparaciones" style="color:#4a5568; line-height: 1.6;"></ul>
+
+        <div style="background:#fffaf0; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #fbd38d;">
+            <label style="color:#dd6b20; font-weight:bold; font-size: 13px;">➕ Agregar actualización o diagnóstico del Servicio Técnico:</label>
+            <div style="display:flex; gap:10px; margin-top:8px;">
+                <input type="text" id="nuevo-comentario-reparacion" placeholder="Ej: Presupuesto aprobado. Esperando placa principal..." style="flex:1; border: 1px solid #cbd5e0; padding: 10px; border-radius: 6px;">
+                <button class="btn-submit" style="width:auto; margin:0; background:#dd6b20;" onclick="guardarComentarioReparacion()">💾 Guardar Nota</button>
+            </div>
+        </div>
+
+        <ul id="ficha-reparaciones" style="color:#4a5568; line-height: 1.6; background: #f7fafc; padding: 15px 15px 15px 35px; border-radius: 6px; border: 1px solid #e2e8f0;"></ul>
+
         <h4 style="color:#e53e3e; border-bottom:1px solid #eee; padding-bottom:5px; margin-top:30px;">⚠️ Observaciones y Fallas en Controles Pre-Turno</h4>
         <div class="table-responsive">
             <table>
@@ -632,391 +702,147 @@
                 <tbody id="ficha-controles-body"></tbody>
             </table>
         </div>
-        <div style="text-align: right; margin-top: 25px;"><button class="btn-submit" style="width:auto; background:#4a5568;" onclick="window.print()">🖨️ Imprimir Ficha</button></div>
-    </div>
-</div>
-
-<div id="modal-mi-perfil" class="modal-overlay">
-    <div class="modal-content" style="max-width: 500px;">
-        <div class="ficha-header">
-            <h2 class="ficha-title">👤 Mi Perfil</h2>
-            <button class="btn-close" onclick="document.getElementById('modal-mi-perfil').style.display='none'">X Cerrar</button>
-        </div>
-        <div class="form-group"><label>Nombre:</label><input type="text" id="perfil-nombre"></div>
-        <div class="form-group"><label>Apellido:</label><input type="text" id="perfil-apellido"></div>
-        <div class="form-group"><label>Email:</label><input type="email" id="perfil-email"></div>
-        <div class="form-group"><label>Teléfono:</label><input type="text" id="perfil-telefono"></div>
-        <div class="form-group"><label>Dirección:</label><input type="text" id="perfil-direccion"></div>
-        <button class="btn-submit" style="background-color: #3182ce; margin-top: 20px;" onclick="guardarMiPerfil()">💾 Guardar Mis Datos</button>
-    </div>
-</div>
-
-<div id="modal-exito" class="modal-overlay">
-    <div style="background:white; padding:40px; border-radius:12px; text-align:center; max-width:450px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
-        <div style="font-size:70px; color:#38b2ac; margin-bottom:10px;">✔️</div>
-        <h2 style="color:#2d3748; margin-bottom:15px;">¡Guardado Exitoso!</h2>
-        <p style="color:#4a5568; margin-bottom:25px; font-size:1.1em;">La planilla de control de sala se registró correctamente en la base de datos.</p>
-        <hr style="border: 0; border-top: 1px solid #e2e8f0; margin-bottom: 20px;">
-        <p style="color:#2d3748; font-weight:bold; margin-bottom:20px; font-size:1.2em;">¿Deseas cargar otro control ahora?</p>
-        <div style="display:flex; gap:15px; justify-content:center;">
-            <button onclick="cerrarModalExito(true)" style="background:#38b2ac; color:white; border:none; padding:12px 25px; border-radius:8px; cursor:pointer; font-weight:bold;">Sí, cargar otro</button>
-            <button onclick="cerrarModalExito(false)" style="background:#e53e3e; color:white; border:none; padding:12px 25px; border-radius:8px; cursor:pointer; font-weight:bold;">No, terminar</button>
+        <div style="text-align: right; margin-top: 25px;">
+            <button class="btn-submit" style="width:auto; background:#4a5568;" onclick="window.print()">🖨️ Imprimir Ficha</button>
         </div>
     </div>
 </div>
+
+<div id="modal-mi-perfil" class="modal-overlay"><div class="modal-content" style="max-width: 500px;"><div class="ficha-header"><h2 class="ficha-title">👤 Mi Perfil</h2><button class="btn-close" onclick="document.getElementById('modal-mi-perfil').style.display='none'">X Cerrar</button></div><div class="form-group"><label>Nombre:</label><input type="text" id="perfil-nombre"></div><div class="form-group"><label>Apellido:</label><input type="text" id="perfil-apellido"></div><div class="form-group"><label>Email:</label><input type="email" id="perfil-email"></div><div class="form-group"><label>Teléfono:</label><input type="text" id="perfil-telefono"></div><div class="form-group"><label>Dirección:</label><input type="text" id="perfil-direccion"></div><button class="btn-submit" style="background-color: #3182ce; margin-top: 20px;" onclick="guardarMiPerfil()">💾 Guardar Mis Datos</button></div></div>
+<div id="modal-exito" class="modal-overlay"><div style="background:white; padding:40px; border-radius:12px; text-align:center; max-width:450px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);"><div style="font-size:70px; color:#38b2ac; margin-bottom:10px;">✔️</div><h2 style="color:#2d3748; margin-bottom:15px;">¡Guardado Exitoso!</h2><p style="color:#4a5568; margin-bottom:25px; font-size:1.1em;">La planilla de control se registró correctamente.</p><div style="display:flex; gap:15px; justify-content:center;"><button onclick="cerrarModalExito(true)" style="background:#38b2ac; color:white; border:none; padding:12px 25px; border-radius:8px; cursor:pointer; font-weight:bold;">Cargar otro</button><button onclick="cerrarModalExito(false)" style="background:#e53e3e; color:white; border:none; padding:12px 25px; border-radius:8px; cursor:pointer; font-weight:bold;">Terminar</button></div></div></div>
 
 <script>
     // --- VARIABLES GLOBALES ---
     let userActivo = ""; let rolActual = "";
-    let equiposDB = []; let baseDeDatosProductos = {}; let estadoGases = {};
+    let equiposDB = []; let baseDeDatosProductos = {};
     let remitoTmp = []; let consTmp = []; let remitoGasTmp = [];
-    let isSubmittingControl = false;
+    let proveedoresDB = []; let isSubmittingControl = false;
+    let historialConsumoGases = []; let historialComprasGases = []; let historialStockInicial = [];
+    let equipoFichaActualId = null; // Guardará el ID del endoscopio activo para los comentarios
 
-    // ==========================================
-    // CONFIGURACIÓN DE KITS (Mantiene los viejos, suma los nuevos)
-    // ==========================================
-    const KITS_BASE = {
-        "Gastroscopia": [], "Colonoscopia": [],
-        "Polipectomía": [], "Mucosectomía": [],
-        "Dilatación Esofágica": [], "Dilatación Colónica": [], "Banding": []
-    };
-    let misKitsGuardados = JSON.parse(localStorage.getItem('clinicaKits'));
-    let misKits = misKitsGuardados ? { ...KITS_BASE, ...misKitsGuardados } : KITS_BASE;
+    // Variables Configurables Totales de Gases
+    let TOTAL_O2 = parseInt(localStorage.getItem('clinica_total_o2')) || 11;
+    let TOTAL_CO2 = parseInt(localStorage.getItem('clinica_total_co2')) || 4;
 
+    const KITS_BASE = { "Gastroscopia": [], "Colonoscopia": [], "Polipectomía": [], "Mucosectomía": [], "Dilatación Esofágica": [], "Dilatación Colónica": [], "Banding": [] };
+    let misKitsGuardados = JSON.parse(localStorage.getItem('clinicaKits')); let misKits = misKitsGuardados ? { ...KITS_BASE, ...misKitsGuardados } : KITS_BASE;
 
-    // ==========================================
-    // CONFIGURACIÓN DE PIZARRA DESDE EL SERVIDOR (NUEVO)
-    // ==========================================
-    let listaPizarra = [];
-    let estadosObs = {};
-
-    // Al iniciar sesión, el sistema descargará las tareas de Java
-    async function cargarPizarraDesdeBD() {
-        try {
-            const res = await fetch('/api/pizarra');
-            if (res.ok) {
-                const tareas = await res.json();
-                listaPizarra = [];
-                estadosObs = {};
-                tareas.forEach(t => {
-                    estadosObs[t.idObs] = { estado: t.estado, comentario: t.comentario };
-                    // Si está activa, la sumamos al panel de Pizarra Visual
-                    if (t.estado === 'en_pizarra') {
-                        listaPizarra.push({ id: t.idObs, fecha: t.fecha, texto: t.texto });
-                    }
-                });
-                dibujarPizarra();
-            }
-        } catch (e) {
-            console.error("Error al conectar con la base de datos de Pizarra. Verifica que creaste los archivos en Java.", e);
-        }
-    }
-
-    function generarIdObs(fecha, prefijo, texto) {
-        let str = fecha + prefijo + texto;
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) hash = Math.imul(31, hash) + str.charCodeAt(i) | 0;
-        return Math.abs(hash).toString(16);
-    }
-
+    let listaPizarra = []; let estadosObs = {};
+    async function cargarPizarraDesdeBD() { try { const res = await fetch('/api/pizarra'); if (res.ok) { const tareas = await res.json(); listaPizarra = []; estadosObs = {}; tareas.forEach(t => { estadosObs[t.idObs] = { estado: t.estado, comentario: t.comentario }; if (t.estado === 'en_pizarra') listaPizarra.push({ id: t.idObs, fecha: t.fecha, texto: t.texto }); }); dibujarPizarra(); } } catch (e) {} }
+    function generarIdObs(fecha, prefijo, texto) { let str = fecha + prefijo + texto; let hash = 0; for (let i = 0; i < str.length; i++) hash = Math.imul(31, hash) + str.charCodeAt(i) | 0; return Math.abs(hash).toString(16); }
     function dibujarPizarra() {
-        const contenedor = document.getElementById("contenedor-observaciones");
-        contenedor.innerHTML = "";
-
-        if (listaPizarra.length === 0) {
-            contenedor.innerHTML = "<div style='text-align:center; padding:20px; color:#a0aec0;'>No hay novedades o tareas pendientes. ¡Todo en orden! ✔️</div>";
-            return;
-        }
-
+        const contenedor = document.getElementById("contenedor-observaciones"); contenedor.innerHTML = "";
+        if (listaPizarra.length === 0) { contenedor.innerHTML = "<div style='text-align:center; padding:20px; color:#a0aec0;'>No hay novedades o tareas pendientes. ¡Todo en orden! ✔️</div>"; return; }
         listaPizarra.forEach((item) => {
-            const fObs = new Date(item.fecha);
-            const hoy = new Date();
-            fObs.setHours(0,0,0,0); hoy.setHours(0,0,0,0);
-            const diffTime = Math.abs(hoy - fObs);
-            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-            let alertaDias = "";
-            if(diffDays === 0) alertaDias = `<span style="color:#38a169; font-size:12px; font-weight:bold;">(Hoy)</span>`;
-            else if(diffDays === 1) alertaDias = `<span style="color:#d69e2e; font-size:12px; font-weight:bold;">(Ayer)</span>`;
-            else alertaDias = `<span style="color:#e53e3e; font-size:12px; font-weight:bold;">(Hace ${diffDays} días)</span>`;
-
-            contenedor.innerHTML += `
-            <div class="observacion-item">
-                <div style="display:flex; flex-direction:column; gap:5px;">
-                    <div><span style="font-size:12px; color:#718096; font-weight:bold;">Reportado el ${item.fecha}</span> ${alertaDias}</div>
-                    <div style="font-size:15px; color:#2d3748;">${item.texto}</div>
-                </div>
-                <div style="display:flex; gap:10px; margin-top:10px;">
-                    <button onclick="cambiarEstadoPizarra('${item.id}', 'resuelta')" style="background:#38a169; color:white; border:none; padding:6px 12px; border-radius:4px; font-size:12px; cursor:pointer; flex:1; font-weight:bold;">✔️ Resolver</button>
-                    <button onclick="cambiarEstadoPizarra('${item.id}', 'desestimada')" style="background:#a0aec0; color:white; border:none; padding:6px 12px; border-radius:4px; font-size:12px; cursor:pointer; flex:1; font-weight:bold;">🗑️ Desestimar</button>
-                </div>
-            </div>`;
+            const fObs = new Date(item.fecha); const hoy = new Date(); fObs.setHours(0,0,0,0); hoy.setHours(0,0,0,0);
+            const diffDays = Math.floor(Math.abs(hoy - fObs) / (1000 * 60 * 60 * 24));
+            let alertaDias = diffDays === 0 ? `<span style="color:#38a169; font-size:12px; font-weight:bold;">(Hoy)</span>` : (diffDays === 1 ? `<span style="color:#d69e2e; font-size:12px; font-weight:bold;">(Ayer)</span>` : `<span style="color:#e53e3e; font-size:12px; font-weight:bold;">(Hace ${diffDays} días)</span>`);
+            contenedor.innerHTML += `<div class="observacion-item"><div style="display:flex; flex-direction:column; gap:5px;"><div><span style="font-size:12px; color:#718096; font-weight:bold;">Reportado el ${item.fecha}</span> ${alertaDias}</div><div style="font-size:15px; color:#2d3748;">${item.texto}</div></div><div style="display:flex; gap:10px; margin-top:10px;"><button onclick="cambiarEstadoPizarra('${item.id}', 'resuelta')" style="background:#38a169; color:white; border:none; padding:6px 12px; border-radius:4px; font-size:12px; cursor:pointer; flex:1; font-weight:bold;">✔️ Resolver</button><button onclick="cambiarEstadoPizarra('${item.id}', 'desestimada')" style="background:#a0aec0; color:white; border:none; padding:6px 12px; border-radius:4px; font-size:12px; cursor:pointer; flex:1; font-weight:bold;">🗑 Desestimar</button></div></div>`;
         });
     }
-
-    async function mandarAPizarra(idObs, fecha, texto, prefijo) {
-        let textoFinal = `[${prefijo}] ${texto}`;
-        let tareaNueva = { idObs: idObs, fecha: fecha, texto: textoFinal, estado: 'en_pizarra', comentario: '' };
-
-        await fetch('/api/pizarra', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(tareaNueva) });
-
-        alert("¡La observación se envió a la Pizarra y quedó guardada en el Servidor!");
-        await cargarPizarraDesdeBD();
-        await cargarHistorial();
-    }
-
-    async function agregarObservacionManual() {
-        const input = document.getElementById("nueva-observacion");
-        if(input.value.trim() === "") return;
-        const hoy = new Date().toISOString().split('T')[0];
-        let idManual = 'manual_' + Date.now();
-
-        let tareaNueva = { idObs: idManual, fecha: hoy, texto: `[MANUAL - ${userActivo}] ${input.value}`, estado: 'en_pizarra', comentario: '' };
-        await fetch('/api/pizarra', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(tareaNueva) });
-
-        input.value = "";
-        await cargarPizarraDesdeBD();
-    }
-
+    async function mandarAPizarra(idObs, fecha, texto, prefijo) { await fetch('/api/pizarra', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ idObs: idObs, fecha: fecha, texto: `[${prefijo}] ${texto}`, estado: 'en_pizarra', comentario: '' }) }); alert("¡La observación se envió a la Pizarra!"); await cargarPizarraDesdeBD(); await cargarHistorial(); }
+    async function agregarObservacionManual() { const input = document.getElementById("nueva-observacion"); if(input.value.trim() === "") return; await fetch('/api/pizarra', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ idObs: 'manual_' + Date.now(), fecha: new Date().toISOString().split('T')[0], texto: `[MANUAL - ${userActivo}] ${input.value}`, estado: 'en_pizarra', comentario: '' }) }); input.value = ""; await cargarPizarraDesdeBD(); }
     async function cambiarEstadoPizarra(idElemento, accion) {
-        let index = listaPizarra.findIndex(x => x.id === idElemento);
-        if(index === -1) return;
-
-        let tareaActiva = listaPizarra[index];
-        let comentario = "";
-
-        if (accion === 'resuelta') {
-            comentario = prompt("✔️ RESOLVIENDO TAREA:\n\n\"" + tareaActiva.texto + "\"\n\nEscribe un comentario sobre cómo se solucionó (Opcional):");
-            if (comentario === null) return;
-        } else if (accion === 'desestimada') {
-            comentario = prompt("🗑️ DESESTIMANDO TAREA:\n\n\"" + tareaActiva.texto + "\"\n\nEscribe el motivo de la cancelación (Obligatorio):");
-            if (!comentario || comentario.trim() === "") {
-                alert("⚠️ Debes ingresar un motivo para poder desestimar la tarea.");
-                return;
-            }
-        }
-
-        // Enviamos la actualización al backend en Java
-        let tareaActualizada = { idObs: idElemento, fecha: tareaActiva.fecha, texto: tareaActiva.texto, estado: accion, comentario: comentario };
-        await fetch('/api/pizarra', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(tareaActualizada) });
-
-        // Recargamos todo desde la base de datos
-        await cargarPizarraDesdeBD();
-        await cargarHistorial();
+        let index = listaPizarra.findIndex(x => x.id === idElemento); if(index === -1) return; let tareaActiva = listaPizarra[index]; let comentario = "";
+        if (accion === 'resuelta') { comentario = prompt("✔ RESOLVIENDO TAREA:\n\n\"" + tareaActiva.texto + "\"\n\nEscribe un comentario sobre cómo se solucionó (Opcional):"); if (comentario === null) return; } else if (accion === 'desestimada') { comentario = prompt("🗑 DESESTIMANDO TAREA:\n\n\"" + tareaActiva.texto + "\"\n\nEscribe el motivo de la cancelación (Obligatorio):"); if (!comentario || comentario.trim() === "") return alert("⚠️ Debes ingresar un motivo para poder desestimar la tarea."); }
+        await fetch('/api/pizarra', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ idObs: idElemento, fecha: tareaActiva.fecha, texto: tareaActiva.texto, estado: accion, comentario: comentario }) });
+        await cargarPizarraDesdeBD(); await cargarHistorial();
     }
+    function actualizarColorSelect(el) { el.classList.remove('select-pendiente', 'select-ok', 'select-falla'); if (el.value === 'ok') { el.classList.add('select-ok'); } else if (el.value === 'obs' || el.value === 'falla') { el.classList.add('select-falla'); } else { el.classList.add('select-pendiente'); } }
 
-
-    // ==========================================
-    // ACTUALIZAR COLOR DE SELECTS EN ROJO
-    // ==========================================
-    function actualizarColorSelect(el) {
-        el.classList.remove('select-pendiente', 'select-ok', 'select-falla');
-        if (el.value === 'ok') {
-            el.classList.add('select-ok');
-        } else if (el.value === 'obs' || el.value === 'falla') {
-            el.classList.add('select-falla');
-        } else {
-            el.classList.add('select-pendiente');
-        }
-    }
-
-    // ==========================================
-    // 1. SESIÓN Y ACCESO
-    // ==========================================
     async function iniciarSesion() {
-        const u = document.getElementById('username').value;
-        const p = document.getElementById('password').value;
+        const u = document.getElementById('username').value; const p = document.getElementById('password').value;
         try {
             const res = await fetch(`/api/usuarios/login?username=${u}&password=${p}`, {method:'POST'});
             if(res.ok) {
                 const data = await res.json(); userActivo = data.username; rolActual = data.rol;
                 document.getElementById('display-user').innerText = `👤 ${userActivo} (${rolActual})`;
-                document.getElementById('login-screen').style.display='none';
-                document.getElementById('dashboard-screen').style.display='flex';
-                if(rolActual === "Administrador" || rolActual === "Administrativa") {
-                    document.getElementById('btn-reparaciones').style.display = 'inline-block';
-                    document.getElementById('btn-ctrl-alta').style.display = 'inline-block';
-                    document.getElementById('btn-inv-alta').style.display = 'inline-block';
-                }
-                if(rolActual === "Administrador") { document.getElementById('btn-usuarios').style.display = 'flex'; document.getElementById('panel-correccion-admin').style.display = 'block'; cargarUsuarios(); }
-
-                // Carga inicial del sistema
-                cargarEquipos(); cargarInsumos(); cargarGases();
-                cargarPizarraDesdeBD(); // CARGA LAS TAREAS DE LA BASE DE DATOS
+                document.getElementById('login-screen').style.display='none'; document.getElementById('dashboard-screen').style.display='flex';
+                if(rolActual === "Administrador" || rolActual === "Administrativa") { document.getElementById('btn-reparaciones').style.display = 'inline-block'; document.getElementById('btn-ctrl-alta').style.display = 'inline-block'; document.getElementById('btn-inv-alta').style.display = 'inline-block'; }
+                if(rolActual === "Administrador") { document.getElementById('btn-usuarios').style.display = 'flex'; document.getElementById('btn-proveedores').style.display = 'flex'; cargarUsuarios(); cargarProveedores(); }
+                cargarEquipos(); cargarInsumos(); cargarGases(); cargarPizarraDesdeBD(); actualizarTextosTotalesGases();
             } else alert("Error de credenciales");
         } catch (e) { alert("Sin conexión al servidor."); }
     }
-
     function cambiarPantalla(id, btn) { document.querySelectorAll('.pantalla').forEach(p=>p.classList.remove('active')); document.querySelectorAll('.menu-btn').forEach(b=>b.classList.remove('active')); document.getElementById(id).classList.add('active'); document.getElementById(btn).classList.add('active'); }
     function mostrarSubCtrl(id) { ['sub-alta-equipo','sub-form','sub-historial','sub-equipos'].forEach(s=>document.getElementById(s).style.display='none'); document.getElementById(id).style.display='block'; }
     function mostrarSubInv(id) { document.querySelectorAll('.sub-inv').forEach(s => s.style.display='none'); document.getElementById(id).style.display='block'; }
     function mostrarSubGas(id) { document.querySelectorAll('.sub-gas').forEach(s => s.style.display='none'); document.getElementById(id).style.display='block'; }
 
     let miUsuarioId = null; let misDatosCompletos = null;
-    async function abrirMiPerfil() {
-        try {
-            const res = await fetch('/api/usuarios'); const usuarios = await res.json();
-            const miUser = usuarios.find(u => u.username === userActivo);
-            if(miUser) {
-                miUsuarioId = miUser.id; misDatosCompletos = miUser;
-                document.getElementById('perfil-nombre').value = miUser.nombreReal || '';
-                document.getElementById('perfil-apellido').value = miUser.apellido || '';
-                document.getElementById('perfil-email').value = miUser.email || '';
-                document.getElementById('perfil-telefono').value = miUser.telefono || '';
-                document.getElementById('perfil-direccion').value = miUser.direccion || '';
-                document.getElementById('modal-mi-perfil').style.display = 'flex';
-            }
-        } catch(e) { alert("Error al cargar perfil."); }
-    }
-    async function guardarMiPerfil() {
-        const payload = { ...misDatosCompletos, nombreReal: document.getElementById('perfil-nombre').value, apellido: document.getElementById('perfil-apellido').value, email: document.getElementById('perfil-email').value, telefono: document.getElementById('perfil-telefono').value, direccion: document.getElementById('perfil-direccion').value };
-        try { await fetch(`/api/usuarios/editar/${miUsuarioId}`, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) }); alert("Perfil actualizado correctamente."); document.getElementById('modal-mi-perfil').style.display = 'none'; } catch(e) { alert("Error al guardar perfil."); }
-    }
+    async function abrirMiPerfil() { try { const res = await fetch('/api/usuarios'); const usuarios = await res.json(); const miUser = usuarios.find(u => u.username === userActivo); if(miUser) { miUsuarioId = miUser.id; misDatosCompletos = miUser; document.getElementById('perfil-nombre').value = miUser.nombreReal || ''; document.getElementById('perfil-apellido').value = miUser.apellido || ''; document.getElementById('perfil-email').value = miUser.email || ''; document.getElementById('perfil-telefono').value = miUser.telefono || ''; document.getElementById('perfil-direccion').value = miUser.direccion || ''; document.getElementById('modal-mi-perfil').style.display = 'flex'; } } catch(e) {} }
+    async function guardarMiPerfil() { const payload = { ...misDatosCompletos, nombreReal: document.getElementById('perfil-nombre').value, apellido: document.getElementById('perfil-apellido').value, email: document.getElementById('perfil-email').value, telefono: document.getElementById('perfil-telefono').value, direccion: document.getElementById('perfil-direccion').value }; try { await fetch(`/api/usuarios/editar/${miUsuarioId}`, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) }); alert("Perfil actualizado correctamente."); document.getElementById('modal-mi-perfil').style.display = 'none'; } catch(e) {} }
 
-    // ==========================================
-    // 2. CONTROL DE SALA
-    // ==========================================
+    // PROVEEDORES
+    async function cargarProveedores() {
+        try {
+            const res = await fetch('/api/proveedores'); proveedoresDB = await res.json();
+            const tb = document.getElementById('tabla-proveedores-body');
+            if(tb) {
+                tb.innerHTML = "";
+                proveedoresDB.forEach(p => { const est = p.activo ? '🟢 Activo' : '🔴 Inactivo'; const btn = p.activo ? `<button onclick="cambiarEstadoProv(${p.id})" class="btn-warning">Suspender</button>` : `<button onclick="cambiarEstadoProv(${p.id})" class="btn-success">Activar</button>`; tb.innerHTML += `<tr><td><b>${p.nombre}</b><br><small style="color:#718096;">CUIT: ${p.cuit||'-'}</small></td><td>${p.contacto||'-'}<br><small style="color:#3182ce;">Tel: ${p.telefono||'-'}</small></td><td>${p.ciudad||'-'}<br><small style="color:#718096;">${p.email||'-'}</small></td><td>${est}</td><td>${btn}</td></tr>`; });
+            }
+            ['factura-proveedor', 'gas-proveedor'].forEach(sId => { const el = document.getElementById(sId); if(el) { el.innerHTML = '<option value="">-- Seleccionar --</option>'; proveedoresDB.filter(p => p.activo).forEach(p => el.innerHTML += `<option value="${p.nombre}">${p.nombre}</option>`); } });
+        } catch (e) {}
+    }
+    async function guardarNuevoProveedor() {
+        const p = { nombre: document.getElementById('prov-nombre').value, cuit: document.getElementById('prov-cuit').value, contacto: document.getElementById('prov-contacto').value, telefono: document.getElementById('prov-tel').value, email: document.getElementById('prov-email').value, direccion: document.getElementById('prov-dir').value, ciudad: document.getElementById('prov-ciudad').value, pais: document.getElementById('prov-pais').value, activo: true };
+        if(!p.nombre) return alert("El nombre de la empresa es obligatorio");
+        await fetch('/api/proveedores', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(p) });
+        ['prov-nombre', 'prov-cuit', 'prov-contacto', 'prov-tel', 'prov-email', 'prov-dir', 'prov-ciudad', 'prov-pais'].forEach(id => document.getElementById(id).value = "");
+        alert("✔️ Proveedor Registrado"); cargarProveedores();
+    }
+    async function cambiarEstadoProv(id) { await fetch(`/api/proveedores/estado/${id}`, { method: 'POST' }); cargarProveedores(); }
+
+    // CONTROL DE SALA E HISTORIAL
     async function guardarTodoElControl() {
         if (isSubmittingControl) return;
-
         try {
             const gastro = document.getElementById('sel-gastro'); const colono = document.getElementById('sel-colono');
-            if(!gastro || !colono) return alert("❌ Error: No encuentro los selectores.");
-            if(!gastro.value && !colono.value) return alert("⚠️ Debes seleccionar al menos un equipo médico.");
-
+            if(!gastro || !colono) return alert("❌ Error: No encuentro los selectores."); if(!gastro.value && !colono.value) return alert("⚠️ Debes seleccionar al menos un equipo médico.");
             const leer = (id) => { const el = document.getElementById(id); return el ? el.value : ""; };
-
             const infraestructura = ['chk-pc','chk-imp','chk-liq','chk-lav','chk-o2','chk-co2', 'chk-torre', 'chk-monitor', 'chk-tensiometro', 'chk-succion', 'chk-pinzas', 'chk-tintas'];
-            for(let id of infraestructura) {
-                if(leer(id) === 'pendiente') return alert("⚠️ Bloqueado: Faltan verificar elementos de Infraestructura, Equipos Médicos o Insumos (Aún están en rojo).");
-            }
-            if(gastro.value) {
-                const gastroChecks = ['gastro-luz','gastro-mov','gastro-fuga','gastro-canal'];
-                for(let id of gastroChecks) { if(leer(id) === 'pendiente') return alert("⚠️ Bloqueado: Falta verificar el estado físico del Gastroscopio."); }
-            }
-            if(colono.value) {
-                const colonoChecks = ['colono-luz','colono-mov','colono-fuga','colono-canal'];
-                for(let id of colonoChecks) { if(leer(id) === 'pendiente') return alert("⚠️ Bloqueado: Falta verificar el estado físico del Colonoscopio."); }
-            }
+            for(let id of infraestructura) { if(leer(id) === 'pendiente') return alert("⚠️ Bloqueado: Faltan verificar elementos de Infraestructura, Equipos Médicos o Insumos (Aún están en rojo)."); }
+            if(gastro.value) { for(let id of ['gastro-luz','gastro-mov','gastro-fuga','gastro-canal']) { if(leer(id) === 'pendiente') return alert("⚠️ Bloqueado: Falta verificar el estado físico del Gastroscopio."); } }
+            if(colono.value) { for(let id of ['colono-luz','colono-mov','colono-fuga','colono-canal']) { if(leer(id) === 'pendiente') return alert("⚠ Bloqueado: Falta verificar el estado físico del Colonoscopio."); } }
 
-            isSubmittingControl = true;
-            document.getElementById('btn-guardar-control').innerText = "⏳ Guardando, espere por favor...";
-            document.getElementById('btn-guardar-control').style.opacity = "0.7";
+            isSubmittingControl = true; document.getElementById('btn-guardar-control').innerText = "⏳ Guardando..."; document.getElementById('btn-guardar-control').style.opacity = "0.7";
 
             const juntarObs = (baseId) => [leer(baseId+'-1'), leer(baseId+'-2'), leer(baseId+'-3')].filter(x => x.trim() !== '').join(';;;');
-
             let obsAutoExtra = [];
-            if(leer('chk-torre')==='obs') obsAutoExtra.push("Falla en Torre de Endoscopia");
-            if(leer('chk-monitor')==='obs') obsAutoExtra.push("Falla en Monitor Multiparamétrico");
-            if(leer('chk-tensiometro')==='obs') obsAutoExtra.push("Falla en Tensiómetro");
-            if(leer('chk-succion')==='obs') obsAutoExtra.push("Falla en Bomba de Succión");
-            if(leer('chk-pinzas')==='obs') obsAutoExtra.push("Faltan Pinzas y Asas en Sala");
-            if(leer('chk-tintas')==='obs') obsAutoExtra.push("Faltan Tintas (China/Índigo)");
+            if(leer('chk-torre')==='obs') obsAutoExtra.push("Falla en Torre de Endoscopia"); if(leer('chk-monitor')==='obs') obsAutoExtra.push("Falla en Monitor Multiparamétrico");
+            if(leer('chk-tensiometro')==='obs') obsAutoExtra.push("Falla en Tensiómetro"); if(leer('chk-succion')==='obs') obsAutoExtra.push("Falla en Bomba de Succión");
+            if(leer('chk-pinzas')==='obs') obsAutoExtra.push("Faltan Pinzas y Asas en Sala"); if(leer('chk-tintas')==='obs') obsAutoExtra.push("Faltan Tintas (China/Índigo)");
 
-            let obsSalaManual = juntarObs('chk-obs-sala');
-            let obsSalaFinal = obsSalaManual;
-            if(obsAutoExtra.length > 0) {
-                let autoTexto = obsAutoExtra.join(';;;');
-                obsSalaFinal = obsSalaManual !== "" ? (autoTexto + ';;;' + obsSalaManual) : autoTexto;
-            }
+            let obsSalaFinal = juntarObs('chk-obs-sala'); if(obsAutoExtra.length > 0) { let autoTexto = obsAutoExtra.join(';;;'); obsSalaFinal = obsSalaFinal !== "" ? (autoTexto + ';;;' + obsSalaFinal) : autoTexto; }
 
             const payload = {
-                usuarioResponsable: userActivo || "Usuario Desconocido",
-                pc: leer('chk-pc'), impresora: leer('chk-imp'), liquidoDesinfectante: leer('chk-liq'), lavadora: leer('chk-lav'),
-                nivelO2: leer('chk-o2'), nivelCO2: leer('chk-co2'), frascosBiopsia: leer('chk-frascos'),
-
-                observacionesSala: obsSalaFinal,
-
-                gastroId: gastro.value ? parseInt(gastro.value) : null,
-                gastroAlias: gastro.value ? gastro.options[gastro.selectedIndex].text : "No utilizado",
-                gastroLuz: leer('gastro-luz'), gastroMov: leer('gastro-mov'), gastroFuga: leer('gastro-fuga'), gastroCanal: leer('gastro-canal'),
-                gastroObs: juntarObs('gastro-obs'),
-
-                colonoId: colono.value ? parseInt(colono.value) : null,
-                colonoAlias: colono.value ? colono.options[colono.selectedIndex].text : "No utilizado",
-                colonoLuz: leer('colono-luz'), colonoMov: leer('colono-mov'), colonoFuga: leer('colono-fuga'), colonoCanal: leer('colono-canal'),
-                colonoObs: juntarObs('colono-obs')
+                usuarioResponsable: userActivo || "Usuario Desconocido", pc: leer('chk-pc'), impresora: leer('chk-imp'), liquidoDesinfectante: leer('chk-liq'), lavadora: leer('chk-lav'), nivelO2: leer('chk-o2'), nivelCO2: leer('chk-co2'), frascosBiopsia: leer('chk-frascos'), observacionesSala: obsSalaFinal,
+                gastroId: gastro.value ? parseInt(gastro.value) : null, gastroAlias: gastro.value ? gastro.options[gastro.selectedIndex].text : "No utilizado", gastroLuz: leer('gastro-luz'), gastroMov: leer('gastro-mov'), gastroFuga: leer('gastro-fuga'), gastroCanal: leer('gastro-canal'), gastroObs: juntarObs('gastro-obs'),
+                colonoId: colono.value ? parseInt(colono.value) : null, colonoAlias: colono.value ? colono.options[colono.selectedIndex].text : "No utilizado", colonoLuz: leer('colono-luz'), colonoMov: leer('colono-mov'), colonoFuga: leer('colono-fuga'), colonoCanal: leer('colono-canal'), colonoObs: juntarObs('colono-obs')
             };
 
             const res = await fetch('/api/control-diario', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-            if (res.ok) {
-                await cargarHistorial();
-                limpiarFormularioControl();
-                document.getElementById('modal-exito').style.display = 'flex';
-            } else { alert("❌ Error al guardar en base de datos."); }
-        } catch (error) {
-            alert("🚨 ERROR: " + error.message);
-        } finally {
-            isSubmittingControl = false;
-            document.getElementById('btn-guardar-control').innerText = "✔️ FIRMAR Y GUARDAR CONTROL DIARIO";
-            document.getElementById('btn-guardar-control').style.opacity = "1";
-        }
+            if (res.ok) { await cargarHistorial(); limpiarFormularioControl(); document.getElementById('modal-exito').style.display = 'flex'; } else { alert("❌ Error al guardar en base de datos."); }
+        } catch (error) { alert("🚨 ERROR: " + error.message); } finally { isSubmittingControl = false; document.getElementById('btn-guardar-control').innerText = "✔️ FIRMAR Y GUARDAR CONTROL DIARIO"; document.getElementById('btn-guardar-control').style.opacity = "1"; }
     }
 
     function limpiarFormularioControl() {
-        const limpiarTxt = (id) => { if(document.getElementById(id)) document.getElementById(id).value = ""; };
-        [1,2,3].forEach(i => { limpiarTxt('chk-obs-sala-'+i); limpiarTxt('gastro-obs-'+i); limpiarTxt('colono-obs-'+i); });
-
-        const equipos = ['sel-gastro','sel-colono'];
-        equipos.forEach(id => { const el = document.getElementById(id); if(el) el.selectedIndex = 0; });
-
-        const selectsVerificacion = [
-            'chk-pc','chk-imp','chk-liq','chk-lav','chk-o2','chk-co2',
-            'chk-torre','chk-monitor','chk-tensiometro','chk-succion',
-            'chk-pinzas','chk-tintas',
-            'gastro-luz','gastro-mov','gastro-fuga','gastro-canal',
-            'colono-luz','colono-mov','colono-fuga','colono-canal'
-        ];
-        selectsVerificacion.forEach(id => { const el = document.getElementById(id); if(el) { el.value = 'pendiente'; actualizarColorSelect(el); } });
-
+        const limpiarTxt = (id) => { if(document.getElementById(id)) document.getElementById(id).value = ""; }; [1,2,3].forEach(i => { limpiarTxt('chk-obs-sala-'+i); limpiarTxt('gastro-obs-'+i); limpiarTxt('colono-obs-'+i); });
+        ['sel-gastro','sel-colono'].forEach(id => { const el = document.getElementById(id); if(el) el.selectedIndex = 0; });
+        ['chk-pc','chk-imp','chk-liq','chk-lav','chk-o2','chk-co2','chk-torre','chk-monitor','chk-tensiometro','chk-succion','chk-pinzas','chk-tintas','gastro-luz','gastro-mov','gastro-fuga','gastro-canal','colono-luz','colono-mov','colono-fuga','colono-canal'].forEach(id => { const el = document.getElementById(id); if(el) { el.value = 'pendiente'; actualizarColorSelect(el); } });
         if(document.getElementById('chk-frascos')) document.getElementById('chk-frascos').value = 0;
     }
-
-    function cerrarModalExito(quiereCargarOtro) {
-        document.getElementById('modal-exito').style.display = 'none';
-        if (!quiereCargarOtro) window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function crearBotonPizarra(fecha, texto, prefijo) {
-        if (!texto || texto.trim() === '') return '';
-        let textoLimpio = texto.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-        let textoFinal = prefijo ? `[${prefijo}] ${textoLimpio}` : textoLimpio;
-        return `<br><button onclick="mandarAPizarra('${fecha}', '${textoFinal}')" style="background:#dd6b20; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; cursor:pointer; margin-top:5px; width:100%; font-weight:bold;">📋 Enviar a Pizarra</button>`;
-    }
+    function cerrarModalExito(quiereCargarOtro) { document.getElementById('modal-exito').style.display = 'none'; if (!quiereCargarOtro) window.scrollTo({ top: 0, behavior: 'smooth' }); }
 
     function procesarNovedadesParaHistorial(textoBruto, fechaCorta, prefijo) {
-        if (!textoBruto) return "";
-        let observaciones = textoBruto.split(';;;');
-        let htmlAcumulado = "";
-
+        if (!textoBruto) return ""; let observaciones = textoBruto.split(';;;'); let htmlAcumulado = "";
         observaciones.forEach(texto => {
-            if (texto.trim() === '') return;
-
-            let idObs = generarIdObs(fechaCorta, prefijo, texto);
-            let objEstado = estadosObs[idObs]; // Esto ahora viene de la Base de Datos al iniciar
-
-            let txtLimpio = texto.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-
-            if (!objEstado) {
-                htmlAcumulado += `<div style="margin-bottom:8px;">
-                    <span style="color:#e53e3e; font-weight:bold;">- ${texto}</span>
-                    <button onclick="mandarAPizarra('${idObs}', '${fechaCorta}', '${txtLimpio}', '${prefijo}')" style="background:#dd6b20; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; cursor:pointer; display:block; margin-top:3px;">📋 Enviar a Pizarra</button>
-                </div>`;
-            } else if (objEstado.estado === 'en_pizarra') {
-                // Desaparece por completo
-            } else if (objEstado.estado === 'resuelta') {
-                let spanComent = objEstado.comentario ? `<br><small style="color:#718096;">Nota: ${objEstado.comentario}</small>` : '';
-                htmlAcumulado += `<div style="margin-bottom:8px; color:#38a169; font-size:13px;">
-                    ✔️ <b>Resuelto:</b> <del>${texto}</del>${spanComent}
-                </div>`;
-            } else if (objEstado.estado === 'desestimada') {
-                htmlAcumulado += `<div style="margin-bottom:8px; color:#a0aec0; font-size:13px;">
-                    🗑️ <b>Desestimado:</b> <del>${texto}</del><br><small style="color:#e53e3e;">Motivo: ${objEstado.comentario}</small>
-                </div>`;
-            }
-        });
-
-        return htmlAcumulado;
+            if (texto.trim() === '') return; let idObs = generarIdObs(fechaCorta, prefijo, texto); let objEstado = estadosObs[idObs]; let txtLimpio = texto.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            if (!objEstado) { htmlAcumulado += `<div style="margin-bottom:8px;"><span style="color:#e53e3e; font-weight:bold;">- ${texto}</span><button onclick="mandarAPizarra('${idObs}', '${fechaCorta}', '${txtLimpio}', '${prefijo}')" style="background:#dd6b20; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; cursor:pointer; display:block; margin-top:3px;">📋 Enviar a Pizarra</button></div>`; }
+            else if (objEstado.estado === 'resuelta') { let spanComent = objEstado.comentario ? `<br><small style="color:#718096;">Nota: ${objEstado.comentario}</small>` : ''; htmlAcumulado += `<div style="margin-bottom:8px; color:#38a169; font-size:13px;">✔ <b>Resuelto:</b> <del>${texto}</del>${spanComent}</div>`; }
+            else if (objEstado.estado === 'desestimada') { htmlAcumulado += `<div style="margin-bottom:8px; color:#a0aec0; font-size:13px;">🗑 <b>Desestimado:</b> <del>${texto}</del><br><small style="color:#e53e3e;">Motivo: ${objEstado.comentario}</small></div>`; }
+        }); return htmlAcumulado;
     }
 
     async function cargarHistorial() {
@@ -1024,64 +850,49 @@
             const res = await fetch('/api/control-diario'); const data = await res.json();
             const d = document.getElementById('f-desde')?.value; const h = document.getElementById('f-hasta')?.value;
             let filtrado = d || h ? data.filter(c => { const f = c.fechaHora.split('T')[0]; return (!d || f >= d) && (!h || f <= h); }) : data;
-
             let html = `<table><thead><tr style="background:#3182ce; color:white;"><th>Fecha</th><th>Usuario</th><th>Gastro (Obs)</th><th>Colono (Obs)</th><th>Novedades</th></tr></thead><tbody>`;
-
             filtrado.reverse().forEach(c => {
                 let fCorta = c.fechaHora.split('T')[0];
-
-                let obsSalaTxt = procesarNovedadesParaHistorial(c.observacionesSala, fCorta, 'SALA');
-                let gastroTxt = procesarNovedadesParaHistorial(c.gastroObs, fCorta, c.gastroAlias);
-                let colonoTxt = procesarNovedadesParaHistorial(c.colonoObs, fCorta, c.colonoAlias);
-
-                if(obsSalaTxt === "") obsSalaTxt = "<span style='color:green'>OK</span>";
-                if(gastroTxt === "") gastroTxt = "<span style='color:green'>OK</span>";
-                if(colonoTxt === "") colonoTxt = "<span style='color:green'>OK</span>";
-
-                html += `<tr>
-                    <td>${new Date(c.fechaHora).toLocaleString()}</td>
-                    <td>${c.usuarioResponsable}</td>
-                    <td><b>${c.gastroAlias}</b><br>${gastroTxt}</td>
-                    <td><b>${c.colonoAlias}</b><br>${colonoTxt}</td>
-                    <td>${obsSalaTxt}</td>
-                </tr>`;
+                let obsSalaTxt = procesarNovedadesParaHistorial(c.observacionesSala, fCorta, 'SALA'); let gastroTxt = procesarNovedadesParaHistorial(c.gastroObs, fCorta, c.gastroAlias); let colonoTxt = procesarNovedadesParaHistorial(c.colonoObs, fCorta, c.colonoAlias);
+                if(obsSalaTxt === "") obsSalaTxt = "<span style='color:green'>OK</span>"; if(gastroTxt === "") gastroTxt = "<span style='color:green'>OK</span>"; if(colonoTxt === "") colonoTxt = "<span style='color:green'>OK</span>";
+                html += `<tr><td>${new Date(c.fechaHora).toLocaleString()}</td><td>${c.usuarioResponsable}</td><td><b>${c.gastroAlias}</b><br>${gastroTxt}</td><td><b>${c.colonoAlias}</b><br>${colonoTxt}</td><td>${obsSalaTxt}</td></tr>`;
             });
             const tabla = document.getElementById('tabla-historial'); if(tabla) tabla.innerHTML = html + "</tbody></table>";
+
+            const resGases = await fetch('/api/gases/conteo'); const dataGases = await resGases.json();
+            let filtradoGases = d || h ? dataGases.filter(c => { return (!d || c.fecha >= d) && (!h || c.fecha <= h); }) : dataGases;
+            let htmlGases = `<table><thead><tr style="background:#dd6b20; color:white;"><th>Fecha Control</th><th>Usuario</th><th>Oxígeno (O2)</th><th>Dióxido de Carbono (CO2)</th></tr></thead><tbody>`;
+            if (filtradoGases.length === 0) { htmlGases += `<tr><td colspan="4" style="text-align:center;">No hay controles de gases en las fechas seleccionadas.</td></tr>`; } else {
+                filtradoGases.reverse().forEach(g => { htmlGases += `<tr><td><b>${g.fecha}</b></td><td>👤 ${g.usuario}</td><td style="color:#2b6cb0;"><b>Llenos:</b> ${g.o2Llenos} | <b>Vacíos:</b> ${g.o2Vacios}</td><td style="color:#4a5568;"><b>Llenos:</b> ${g.co2Llenos} | <b>Vacíos:</b> ${g.co2Vacios}</td></tr>`; });
+            }
+            const tablaGasesAudit = document.getElementById('tabla-historial-conteo-gases'); if(tablaGasesAudit) tablaGasesAudit.innerHTML = htmlGases + "</tbody></table>";
         } catch (e) {}
     }
 
-    // ==========================================
-    // 3. INVENTARIO (Categorizado, Decimales y Kits)
-    // ==========================================
+    // INVENTARIO
     async function cargarInsumos() {
         try {
             const res = await fetch('/api/insumos'); const data = await res.json();
             baseDeDatosProductos = {}; let opcionesBuscador = '';
-            data.forEach(p => {
-                baseDeDatosProductos[p.id] = p;
-                opcionesBuscador += `<option data-id="${p.id}" value="${p.nombre}"></option>`;
-            });
+            data.forEach(p => { baseDeDatosProductos[p.id] = p; opcionesBuscador += `<option data-id="${p.id}" value="${p.nombre}"></option>`; });
             document.getElementById('lista-insumos').innerHTML = opcionesBuscador;
-
-            actualizarSelectoresKits();
-            dibujarInventario();
-            dibujarCatalogoInsumos();
+            actualizarSelectoresKits(); dibujarInventario(); dibujarCatalogoInsumos(); dibujarListaPrecios();
         } catch(e) {}
     }
 
     function dibujarInventario() {
         let cuadro = document.getElementById('lista-inventario'); if (!cuadro) return;
-        const categorias = ["Medicamentos", "Descartables", "Insumos de Alto Costo", "Otros"];
-        let htmlCompleto = "";
-
+        const categorias = ["Medicamentos", "Descartables", "Insumos de Alto Costo", "Otros"]; let htmlCompleto = "";
         categorias.forEach(cat => {
             let filtrados = Object.values(baseDeDatosProductos).filter(p => p.categoria === cat || (!p.categoria && cat === "Otros")).sort((a,b) => a.nombre.localeCompare(b.nombre));
             if(filtrados.length > 0) {
-                htmlCompleto += `<h4 class="categoria-titulo">📦 ${cat}</h4>`;
-                htmlCompleto += `<table><thead><tr style="background:#4a5568; color:white;"><th>Insumo</th><th>Stock</th><th>Estado</th></tr></thead><tbody>`;
+                htmlCompleto += `<h4 class="categoria-titulo">📦 ${cat}</h4><table><thead><tr style="background:#4a5568; color:white;"><th>Insumo</th><th>Stock</th><th>Estado</th><th style="text-align:center;">Acciones</th></tr></thead><tbody>`;
                 filtrados.forEach(p => {
                     const est = p.stock <= p.stockCritico ? '<span style="color:red; font-weight:bold;">⚠️ Crítico</span>' : '<span style="color:green;">✔️ Normal</span>';
-                    htmlCompleto += `<tr><td>${p.nombre}</td><td style="font-size:1.1em;"><b>${p.stock}</b></td><td>${est}</td></tr>`;
+                    htmlCompleto += `<tr><td>${p.nombre}</td><td style="font-size:1.1em;"><b>${p.stock}</b></td><td>${est}</td><td style="text-align:center; display:flex; gap:8px; justify-content:center;">
+                        <button onclick="ajustarSoloStock(${p.id})" class="btn-info" style="background:#d69e2e; margin:0;">📦 Stock</button>
+                        <button onclick="ajustarSoloPrecio(${p.id})" class="btn-info" style="background:#3182ce; margin:0;">💰 Precio</button>
+                    </td></tr>`;
                 });
                 htmlCompleto += `</tbody></table>`;
             }
@@ -1091,401 +902,274 @@
 
     function dibujarCatalogoInsumos() {
         const tb = document.getElementById('tabla-catalogo-insumos'); if (!tb) return;
-        tb.innerHTML = "";
-        let lista = Object.values(baseDeDatosProductos).sort((a,b) => a.nombre.localeCompare(b.nombre));
+        tb.innerHTML = ""; let lista = Object.values(baseDeDatosProductos).sort((a,b) => a.nombre.localeCompare(b.nombre));
         lista.forEach(p => {
-            const isActivo = p.activo !== false;
-            const btnEstado = isActivo
-                ? `<button onclick="cambiarEstadoInsumo(${p.id})" class="btn-warning">⏸️ Suspender</button>`
-                : `<button onclick="cambiarEstadoInsumo(${p.id})" class="btn-success">▶️ Activar</button>`;
-            tb.innerHTML += `<tr><td><b>${p.nombre}</b></td><td>${p.categoria || 'Sin Categoría'}</td><td style="text-align:center;">${p.stockCritico}</td><td style="text-align:center;">${isActivo ? '🟢 Activo' : '🔴 Susp.'}</td>
-            <td style="text-align:center;">
-                <button onclick="editarInsumo(${p.id}, '${p.nombre}', '${p.categoria}', ${p.stockCritico})" class="btn-info">✏️ Editar</button>
-                ${btnEstado}
-                <button onclick="eliminarInsumo(${p.id})" class="btn-danger">🗑️ Eliminar</button>
-            </td></tr>`;
+            const isActivo = p.activo !== false; const btnEstado = isActivo ? `<button onclick="cambiarEstadoInsumo(${p.id})" class="btn-warning">⏸️ Suspender</button>` : `<button onclick="cambiarEstadoInsumo(${p.id})" class="btn-success">▶ Activar</button>`;
+            tb.innerHTML += `<tr><td><b>${p.nombre}</b></td><td>${p.categoria || 'Sin Categoría'}</td><td style="text-align:center;">${p.stockCritico}</td><td style="text-align:center;">${isActivo ? '🟢 Activo' : '🔴 Susp.'}</td><td style="text-align:center;"><button onclick="editarInsumo(${p.id})" class="btn-info">✏ Editar Datos</button> <button onclick="modificarStockCritico(${p.id})" class="btn-warning" style="background:#ed8936;">⚠️ Modificar Mínimo</button> ${btnEstado} <button onclick="eliminarInsumo(${p.id})" class="btn-danger">🗑 Eliminar</button></td></tr>`;
         });
+    }
+
+    function dibujarListaPrecios() {
+        const contenedor = document.getElementById('tabla-precios-container'); if (!contenedor) return;
+        let html = `<table><thead><tr style="background:#2b6cb0; color:white;"><th>Nombre del Insumo</th><th>Categoría</th><th style="text-align:center;">Último Precio Compra</th><th style="text-align:center;">Stock Actual</th><th style="text-align:center;">Valorización (Capital)</th></tr></thead><tbody>`;
+        let totalValorizado = 0; let lista = Object.values(baseDeDatosProductos).sort((a,b) => a.nombre.localeCompare(b.nombre));
+        lista.forEach(p => { let precio = p.precioActual || 0; let valorizacion = p.stock * precio; totalValorizado += valorizacion; html += `<tr><td><b>${p.nombre}</b></td><td>${p.categoria || 'Sin Categoría'}</td><td style="text-align:center; color:#38a169; font-weight:bold;">$ ${precio.toFixed(2)}</td><td style="text-align:center;">${p.stock}</td><td style="text-align:center; font-weight:bold;">$ ${valorizacion.toFixed(2)}</td></tr>`; });
+        html += `<tr style="background:#ebf8ff; font-size:1.1em;"><td colspan="4" style="text-align:right;"><b>CAPITAL TOTAL EN INVENTARIO:</b></td><td style="text-align:center; color:#c53030; font-weight:bold;">$ ${totalValorizado.toFixed(2)}</td></tr></tbody></table>`; contenedor.innerHTML = html;
     }
 
     async function cambiarEstadoInsumo(id) { await fetch(`/api/insumos/estado/${id}`, { method: 'POST' }); cargarInsumos(); }
-    async function eliminarInsumo(id) {
-        if(confirm("⚠️ ¿Eliminar insumo DE FORMA PERMANENTE?\nNota: Si ya tiene historial, el sistema podría impedirlo. Usa 'Suspender' en su lugar.")) {
-            try { const res = await fetch(`/api/insumos/${id}`, {method: 'DELETE'}); if(!res.ok) throw new Error(); cargarInsumos(); }
-            catch(e) { alert("❌ No se puede eliminar. Usa el botón '⏸️ Suspender'."); }
+    async function eliminarInsumo(id) { if(confirm("⚠ ¿Eliminar insumo DE FORMA PERMANENTE?")) { try { const res = await fetch(`/api/insumos/${id}`, {method: 'DELETE'}); if(!res.ok) throw new Error(); cargarInsumos(); } catch(e) { alert("❌ No se puede eliminar. Usa el botón '⏸ Suspender'."); } } }
+
+    async function modificarStockCritico(id) {
+        const prod = baseDeDatosProductos[id]; if (!prod) return;
+        const cr = prompt(`Modificar Stock Mínimo Crítico para: ${prod.nombre}\nActual: ${prod.stockCritico}\nIngrese el nuevo límite mínimo:`, prod.stockCritico);
+        if(cr !== null && cr.trim() !== "") {
+            await fetch(`/api/insumos/modificar-critico/${id}?nuevoCritico=${cr}`, {method:'POST'});
+            cargarInsumos();
         }
     }
-    async function editarInsumo(id, nom, cat, crit) { const n = prompt("Editar Nombre:", nom); if(n && n!==nom) await fetch(`/api/insumos/editar-nombre/${id}?nuevoNombre=${encodeURIComponent(n)}`, {method:'POST'}); const c = prompt("Editar Categoría (Opciones recomendadas: Medicamentos, Descartables, Insumos de Alto Costo):", cat); if(c && c!==cat) await fetch(`/api/insumos/editar-categoria/${id}?nuevaCategoria=${encodeURIComponent(c)}`, {method:'POST'}); const cr = prompt("Editar Mínimo Crítico (Permite decimales):", crit); if(cr && cr!==crit.toString()) await fetch(`/api/insumos/modificar-critico/${id}?nuevoCritico=${cr}`, {method:'POST'}); cargarInsumos(); }
-    async function funcionAltaProducto() { const p = { nombre: document.getElementById('alta-nombre').value, stockCritico: parseFloat(document.getElementById('alta-critico').value), categoria: document.getElementById('alta-categoria').value, stock: 0 }; await fetch('/api/insumos', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(p)}); document.getElementById('alta-nombre').value=""; document.getElementById('alta-critico').value=""; alert("Insumo Registrado"); cargarInsumos(); document.getElementById('panel-nuevo-insumo').style.display='none'; }
+
+    async function ajustarSoloStock(id) {
+        const prod = baseDeDatosProductos[id]; if (!prod) return;
+        let nuevoStock = prompt(`Ajustar STOCK FÍSICO para: ${prod.nombre}\nStock actual: ${prod.stock}\nIngrese el nuevo stock real:`, prod.stock);
+        if (nuevoStock !== null && nuevoStock.trim() !== "") {
+            nuevoStock = nuevoStock.replace(',', '.'); const cantidadFinal = parseFloat(nuevoStock);
+            if (!isNaN(cantidadFinal)) {
+                let url = `/api/insumos/ajustar/${id}?cantidad=${cantidadFinal}&usuario=${encodeURIComponent(userActivo)}`;
+                try {
+                    const res = await fetch(url, { method: 'POST' });
+                    if (res.ok) { await cargarInsumos(); }
+                    else { alert("❌ El servidor rechazó el cambio."); }
+                } catch (e) { alert("❌ Error de conexión."); }
+            } else { alert("⚠️ Número de stock inválido."); }
+        }
+    }
+
+    async function ajustarSoloPrecio(id) {
+        const prod = baseDeDatosProductos[id]; if (!prod) return;
+        let nuevoPrecio = prompt(`Actualizar PRECIO para: ${prod.nombre}\nPrecio actual: $${prod.precioActual || 0}\nIngrese el nuevo precio unitario:`, prod.precioActual || 0);
+        if (nuevoPrecio !== null && nuevoPrecio.trim() !== "") {
+            let precioLimpio = parseFloat(nuevoPrecio.replace(',', '.'));
+            if (!isNaN(precioLimpio)) {
+                try {
+                    await fetch(`/api/insumos/editar-precio/${id}?nuevoPrecio=${precioLimpio}`, {method:'POST'});
+                    await cargarInsumos();
+                } catch (e) { alert("❌ Error de conexión."); }
+            } else { alert("⚠️ Precio inválido."); }
+        }
+    }
+
+    async function editarInsumo(id) {
+        const prod = baseDeDatosProductos[id]; if (!prod) return;
+        const n = prompt("Editar Nombre:", prod.nombre); if(n && n !== prod.nombre) await fetch(`/api/insumos/editar-nombre/${id}?nuevoNombre=${encodeURIComponent(n)}`, {method:'POST'});
+        const pr = prompt("Editar Precio Unitario ($):", prod.precioActual || 0); if(pr !== null && pr.trim() !== "") { let precioLimpio = pr.replace(',', '.'); await fetch(`/api/insumos/editar-precio/${id}?nuevoPrecio=${parseFloat(precioLimpio)}`, {method:'POST'}); }
+        const c = prompt("Editar Categoría:", prod.categoria); if(c && c !== prod.categoria) await fetch(`/api/insumos/editar-categoria/${id}?nuevaCategoria=${encodeURIComponent(c)}`, {method:'POST'});
+        cargarInsumos();
+    }
+    async function funcionAltaProducto() {
+        const p = { nombre: document.getElementById('alta-nombre').value, precioActual: parseFloat(document.getElementById('alta-precio').value) || 0.0, stockCritico: parseFloat(document.getElementById('alta-critico').value) || 0, categoria: document.getElementById('alta-categoria').value, stock: 0 };
+        await fetch('/api/insumos', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(p)});
+        document.getElementById('alta-nombre').value=""; document.getElementById('alta-precio').value="0.00"; document.getElementById('alta-critico').value=""; alert("Insumo Registrado"); cargarInsumos(); document.getElementById('panel-nuevo-insumo').style.display='none';
+    }
 
     function agregarItemAlRemito() {
-        const nombre = document.getElementById('ingreso-select').value;
-        const op = document.querySelector(`#lista-insumos option[value="${nombre}"]`);
-        if (!op) return alert("❌ Seleccione un insumo válido de la lista.");
-        const idx = op.getAttribute('data-id');
-        const cant = parseFloat(document.getElementById('ingreso-cantidad').value);
-        const fecha = document.getElementById('ingreso-fecha').value;
-        const vto = document.getElementById('ingreso-vto').value || "-";
-
-        if(!cant || isNaN(cant) || !fecha) return alert("Complete los datos requeridos correctamente.");
-        if (fecha > new Date().toISOString().split('T')[0]) return alert("❌ Fecha no puede ser futura.");
-
-        remitoTmp.push({ id: baseDeDatosProductos[idx].id, nombre: baseDeDatosProductos[idx].nombre, cant: cant, fecha: fecha, vto: vto });
-        dibujarRemito(); document.getElementById('ingreso-select').value = ""; document.getElementById('ingreso-cantidad').value = "";
+        const nombre = document.getElementById('ingreso-select').value; const op = document.querySelector(`#lista-insumos option[value="${nombre}"]`); if (!op) return alert("❌ Seleccione un insumo válido.");
+        const idx = op.getAttribute('data-id'); const cant = parseFloat(document.getElementById('ingreso-cantidad').value); const precio = parseFloat(document.getElementById('ingreso-precio').value) || 0; const fecha = document.getElementById('ingreso-fecha').value; const vto = document.getElementById('ingreso-vto').value || "-";
+        if(!cant || isNaN(cant) || !fecha) return alert("Complete los datos requeridos."); if (fecha > new Date().toISOString().split('T')[0]) return alert("❌ Fecha no puede ser futura.");
+        remitoTmp.push({ id: baseDeDatosProductos[idx].id, nombre: baseDeDatosProductos[idx].nombre, cant: cant, precio: precio, fecha: fecha, vto: vto });
+        dibujarRemito(); document.getElementById('ingreso-select').value = ""; document.getElementById('ingreso-cantidad').value = ""; document.getElementById('ingreso-precio').value = "";
     }
-
     function dibujarRemito() {
-        if(remitoTmp.length===0){ document.getElementById('lista-remito-tmp').innerHTML="<i>No hay insumos cargados.</i>"; return;}
-        remitoTmp.sort((a,b) => a.nombre.localeCompare(b.nombre));
-        let h="<table style='width:100%; border-collapse:collapse;'><tr><th>Insumo</th><th>Cant</th><th>Vto</th><th>Acción</th></tr>";
-        remitoTmp.forEach((x,i)=>{ h+=`<tr><td>${x.nombre}</td><td style='color:green; font-weight:bold;'>+${x.cant}</td><td>${x.vto}</td><td><button onclick="remitoTmp.splice(${i},1); dibujarRemito()" class="btn-danger">X</button></td></tr>`; });
+        if(remitoTmp.length===0){ document.getElementById('lista-remito-tmp').innerHTML="<i>No hay insumos cargados.</i>"; return;} remitoTmp.sort((a,b) => a.nombre.localeCompare(b.nombre));
+        let h="<table style='width:100%; border-collapse:collapse;'><tr><th>Insumo</th><th>Cant</th><th>Precio Unit.</th><th>Vto</th><th>Acción</th></tr>";
+        remitoTmp.forEach((x,i)=>{ h+=`<tr><td>${x.nombre}</td><td style='color:green; font-weight:bold;'>+${x.cant}</td><td style='color:#3182ce; font-weight:bold;'>$${x.precio}</td><td>${x.vto}</td><td><button onclick="remitoTmp.splice(${i},1); dibujarRemito()" class="btn-danger">X</button></td></tr>`; });
         document.getElementById('lista-remito-tmp').innerHTML=h+"</table>";
     }
-
     async function confirmarIngresoMasivo() {
         if(remitoTmp.length === 0) return alert("La lista está vacía.");
-        const numRemito = document.getElementById('remito-numero').value;
+        const numRemito = document.getElementById('remito-numero').value; const numFactura = document.getElementById('factura-numero').value; const fFactura = document.getElementById('factura-fecha').value; const prov = document.getElementById('factura-proveedor').value;
         for(let x of remitoTmp) {
-            let url = `/api/insumos/ingresar/${x.id}?cantidad=${x.cant}&fecha=${x.fecha}`;
-            if (numRemito) url += `&numeroRemito=${encodeURIComponent(numRemito)}`;
+            let url = `/api/insumos/ingresar/${x.id}?cantidad=${x.cant}&fecha=${x.fecha}&precio=${x.precio}&usuario=${encodeURIComponent(userActivo)}`;
+            if (numRemito) url += `&numeroRemito=${encodeURIComponent(numRemito)}`; if (numFactura) url += `&numeroFactura=${encodeURIComponent(numFactura)}`; if (fFactura) url += `&fechaFactura=${encodeURIComponent(fFactura)}`; if (prov) url += `&proveedorNombre=${encodeURIComponent(prov)}`;
             await fetch(url, {method:'POST'});
         }
-        remitoTmp=[]; dibujarRemito(); await cargarInsumos(); document.getElementById('remito-numero').value = ""; alert("✔️ Remito Procesado.");
+        remitoTmp=[]; dibujarRemito(); await cargarInsumos(); document.getElementById('remito-numero').value = ""; document.getElementById('factura-numero').value = ""; document.getElementById('factura-fecha').value = ""; document.getElementById('factura-proveedor').selectedIndex = 0; alert("✔️ Ingreso Procesado con comprobantes.");
     }
 
-    function actualizarSelectoresKits() {
-        let html = "";
-        for(let k in misKits) { html += `<option value="${k}">${k}</option>`; }
-        if(document.getElementById('select-kit-baja')) document.getElementById('select-kit-baja').innerHTML = html;
-        if(document.getElementById('config-kit-select')) document.getElementById('config-kit-select').innerHTML = html;
-    }
-
-    function abrirConfiguracionKits() {
-        actualizarSelectoresKits();
-        dibujarKitActual();
-        document.getElementById('modal-kits').style.display = 'flex';
-    }
-
+    function actualizarSelectoresKits() { let html = ""; for(let k in misKits) { html += `<option value="${k}">${k}</option>`; } if(document.getElementById('select-kit-baja')) document.getElementById('select-kit-baja').innerHTML = html; if(document.getElementById('config-kit-select')) document.getElementById('config-kit-select').innerHTML = html; }
+    function abrirConfiguracionKits() { actualizarSelectoresKits(); dibujarKitActual(); document.getElementById('modal-kits').style.display = 'flex'; }
     function dibujarKitActual() {
-        const kitName = document.getElementById('config-kit-select').value;
-        const tb = document.getElementById('tabla-config-kit');
-        tb.innerHTML = "";
-        if(misKits[kitName] && misKits[kitName].length > 0) {
-            misKits[kitName].forEach((item, index) => {
-                tb.innerHTML += `<tr><td>${item.nombre}</td><td style="text-align:center;">${item.cant}</td><td style="text-align:center;"><button onclick="quitarInsumoDeKit('${kitName}', ${index})" class="btn-danger">X</button></td></tr>`;
-            });
-        } else {
-            tb.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#718096;">Este kit aún no tiene insumos configurados.</td></tr>`;
-        }
+        const kitName = document.getElementById('config-kit-select').value; const tb = document.getElementById('tabla-config-kit'); tb.innerHTML = "";
+        if(misKits[kitName] && misKits[kitName].length > 0) { misKits[kitName].forEach((item, index) => { tb.innerHTML += `<tr><td>${item.nombre}</td><td style="text-align:center;">${item.cant}</td><td style="text-align:center;"><button onclick="quitarInsumoDeKit('${kitName}', ${index})" class="btn-danger">X</button></td></tr>`; }); } else { tb.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#718096;">Este kit aún no tiene insumos configurados.</td></tr>`; }
     }
-
     function agregarInsumoAKit() {
-        const kitName = document.getElementById('config-kit-select').value;
-        const nombre = document.getElementById('config-kit-insumo').value;
-        const cant = parseFloat(document.getElementById('config-kit-cant').value);
-
-        const op = document.querySelector(`#lista-insumos option[value="${nombre}"]`);
-        if(!op || isNaN(cant) || cant <= 0) return alert("❌ Seleccione un insumo válido y la cantidad.");
-        const idx = op.getAttribute('data-id');
-
-        if(!misKits[kitName]) misKits[kitName] = [];
+        const kitName = document.getElementById('config-kit-select').value; const nombre = document.getElementById('config-kit-insumo').value; const cant = parseFloat(document.getElementById('config-kit-cant').value);
+        const op = document.querySelector(`#lista-insumos option[value="${nombre}"]`); if(!op || isNaN(cant) || cant <= 0) return alert("❌ Seleccione un insumo válido y la cantidad.");
+        const idx = op.getAttribute('data-id'); if(!misKits[kitName]) misKits[kitName] = [];
         let existente = misKits[kitName].find(i => i.id == baseDeDatosProductos[idx].id);
-        if(existente) {
-            existente.cant = parseFloat((existente.cant + cant).toFixed(2));
-        } else {
-            misKits[kitName].push({ id: baseDeDatosProductos[idx].id, nombre: baseDeDatosProductos[idx].nombre, cant: cant });
-        }
-
-        localStorage.setItem('clinicaKits', JSON.stringify(misKits));
-        document.getElementById('config-kit-insumo').value = ""; document.getElementById('config-kit-cant').value = "1";
-        dibujarKitActual();
+        if(existente) { existente.cant = parseFloat((existente.cant + cant).toFixed(2)); } else { misKits[kitName].push({ id: baseDeDatosProductos[idx].id, nombre: baseDeDatosProductos[idx].nombre, cant: cant }); }
+        localStorage.setItem('clinicaKits', JSON.stringify(misKits)); document.getElementById('config-kit-insumo').value = ""; document.getElementById('config-kit-cant').value = "1"; dibujarKitActual();
     }
-
-    function quitarInsumoDeKit(kitName, index) {
-        misKits[kitName].splice(index, 1);
-        localStorage.setItem('clinicaKits', JSON.stringify(misKits));
-        dibujarKitActual();
-    }
+    function quitarInsumoDeKit(kitName, index) { misKits[kitName].splice(index, 1); localStorage.setItem('clinicaKits', JSON.stringify(misKits)); dibujarKitActual(); }
 
     function agregarKitAlConsumo() {
-        const kitName = document.getElementById('select-kit-baja').value;
-        const pacientes = parseInt(document.getElementById('input-pacientes-kit').value);
-        let fechaGlobal = document.getElementById('consumo-fecha').value;
-
-        if(!pacientes || pacientes < 1) return alert("❌ Ingrese un número válido de pacientes.");
-        if(!misKits[kitName] || misKits[kitName].length === 0) return alert("❌ El kit seleccionado está vacío. Use el botón 'Configurar Kits' primero.");
-        if(!fechaGlobal) {
-            fechaGlobal = new Date().toISOString().split('T')[0];
-            document.getElementById('consumo-fecha').value = fechaGlobal;
-        }
-
+        const kitName = document.getElementById('select-kit-baja').value; const pacientes = parseInt(document.getElementById('input-pacientes-kit').value); let fechaGlobal = document.getElementById('consumo-fecha').value;
+        if(!pacientes || pacientes < 1) return alert("❌ Ingrese un número válido de pacientes."); if(!misKits[kitName] || misKits[kitName].length === 0) return alert("❌ El kit seleccionado está vacío.");
+        if(!fechaGlobal) { fechaGlobal = new Date().toISOString().split('T')[0]; document.getElementById('consumo-fecha').value = fechaGlobal; }
         let alertasStock = [];
-
         misKits[kitName].forEach(item => {
-            const totalDescontar = parseFloat((item.cant * pacientes).toFixed(2));
-            const prod = Object.values(baseDeDatosProductos).find(p => p.id === item.id);
-
+            const totalDescontar = parseFloat((item.cant * pacientes).toFixed(2)); const prod = Object.values(baseDeDatosProductos).find(p => p.id === item.id);
             if(prod) {
-                if(totalDescontar > prod.stock) {
-                    alertasStock.push(`⚠️ ${prod.nombre}: Necesitas ${totalDescontar} pero solo hay ${prod.stock}.`);
-                }
+                if(totalDescontar > prod.stock) alertasStock.push(`⚠️ ${prod.nombre}: Necesitas ${totalDescontar} pero solo hay ${prod.stock}.`);
                 let itemExistente = consTmp.find(c => c.id === prod.id && c.fecha === fechaGlobal);
-                if(itemExistente) {
-                    itemExistente.cant = parseFloat((itemExistente.cant + totalDescontar).toFixed(2));
-                } else {
-                    consTmp.push({ id: prod.id, nombre: prod.nombre, cant: totalDescontar, fecha: fechaGlobal });
-                }
+                if(itemExistente) { itemExistente.cant = parseFloat((itemExistente.cant + totalDescontar).toFixed(2)); } else { consTmp.push({ id: prod.id, nombre: prod.nombre, cant: totalDescontar, fecha: fechaGlobal }); }
             }
         });
-
-        if(alertasStock.length > 0) {
-            alert("ATENCIÓN: Algunos insumos de este Kit superan el stock actual:\n\n" + alertasStock.join("\n") + "\n\nFueron agregados a la lista, pero la base de datos podría rechazar la confirmación si no hay stock.");
-        }
-
-        dibujarConsumo();
+        if(alertasStock.length > 0) alert("ATENCIÓN: Algunos insumos superan el stock actual:\n\n" + alertasStock.join("\n")); dibujarConsumo();
     }
-
     function agregarItemAlConsumo() {
-        const nombre = document.getElementById('consumo-select').value;
-        const op = document.querySelector(`#lista-insumos option[value="${nombre}"]`);
-        if (!op) return alert("❌ Seleccione un insumo válido de la lista.");
-        const idx = op.getAttribute('data-id');
-        const cant = parseFloat(document.getElementById('consumo-cantidad').value);
-        const fecha = document.getElementById('consumo-fecha').value;
-
-        if(!cant || isNaN(cant) || !fecha) return alert("Debe colocar la cantidad a descontar y la FECHA DE CONSUMO abajo.");
-        if (fecha > new Date().toISOString().split('T')[0]) return alert("❌ Fecha no puede ser futura.");
+        const nombre = document.getElementById('consumo-select').value; const op = document.querySelector(`#lista-insumos option[value="${nombre}"]`); if (!op) return alert("❌ Seleccione un insumo válido.");
+        const idx = op.getAttribute('data-id'); const cant = parseFloat(document.getElementById('consumo-cantidad').value); const fecha = document.getElementById('consumo-fecha').value;
+        if(!cant || isNaN(cant) || !fecha) return alert("Debe colocar la cantidad a descontar y la FECHA DE CONSUMO abajo."); if (fecha > new Date().toISOString().split('T')[0]) return alert("❌ Fecha no puede ser futura.");
         if(cant > baseDeDatosProductos[idx].stock) return alert(`❌ No hay suficiente stock. (Disponible: ${baseDeDatosProductos[idx].stock})`);
-
         let itemExistente = consTmp.find(c => c.id == baseDeDatosProductos[idx].id && c.fecha == fecha);
-        if(itemExistente) {
-            itemExistente.cant = parseFloat((itemExistente.cant + cant).toFixed(2));
-        } else {
-            consTmp.push({ id: baseDeDatosProductos[idx].id, nombre: baseDeDatosProductos[idx].nombre, cant: cant, fecha: fecha });
-        }
-
+        if(itemExistente) { itemExistente.cant = parseFloat((itemExistente.cant + cant).toFixed(2)); } else { consTmp.push({ id: baseDeDatosProductos[idx].id, nombre: baseDeDatosProductos[idx].nombre, cant: cant, fecha: fecha }); }
         dibujarConsumo(); document.getElementById('consumo-select').value = ""; document.getElementById('consumo-cantidad').value = "";
     }
-
     function dibujarConsumo() {
-        if(consTmp.length===0){ document.getElementById('lista-consumo-tmp').innerHTML="<i>No hay consumos cargados.</i>"; return;}
-        consTmp.sort((a,b) => a.nombre.localeCompare(b.nombre));
+        if(consTmp.length===0){ document.getElementById('lista-consumo-tmp').innerHTML="<i>No hay consumos cargados.</i>"; return;} consTmp.sort((a,b) => a.nombre.localeCompare(b.nombre));
         let h="<table style='width:100%; border-collapse:collapse;'><tr><th>Insumo</th><th>Cant Total a Descontar</th><th>Fecha</th><th>Acción</th></tr>";
         consTmp.forEach((x,i)=>{ h+=`<tr><td>${x.nombre}</td><td style='color:red; font-weight:bold; font-size:1.1em;'>-${x.cant}</td><td>${x.fecha}</td><td><button onclick="consTmp.splice(${i},1); dibujarConsumo()" class="btn-danger">X</button></td></tr>`; });
         document.getElementById('lista-consumo-tmp').innerHTML=h+"</table>";
     }
-
     async function confirmarConsumoMasivo() {
-        if(consTmp.length === 0) return alert("La lista está vacía.");
-        document.getElementById('consumo-fecha').value = "";
-        for(let x of consTmp) await fetch(`/api/insumos/consumir/${x.id}?cantidad=${x.cant}&fecha=${x.fecha}`, {method:'POST'});
+        if(consTmp.length === 0) return alert("La lista está vacía."); document.getElementById('consumo-fecha').value = "";
+        for(let x of consTmp) { await fetch(`/api/insumos/consumir/${x.id}?cantidad=${x.cant}&fecha=${x.fecha}&usuario=${encodeURIComponent(userActivo)}`, {method:'POST'}); }
         consTmp=[]; dibujarConsumo(); await cargarInsumos(); alert("✔️ Consumos descontados exitosamente de la Clínica.");
     }
 
     async function generarReporte(esIndividual) {
-        const i = document.getElementById('reporte-inicio').value;
-        const f = document.getElementById('reporte-fin').value;
-        if(!i || !f) return alert("Por favor, seleccione las fechas 'Desde' y 'Hasta'.");
-
-        let insumoFiltro = "";
-        if (esIndividual) {
-            insumoFiltro = document.getElementById('reporte-insumo-select').value.trim().toLowerCase();
-            if (!insumoFiltro) return alert("Por favor, seleccione un insumo de la lista para buscar.");
-        }
-
-        document.getElementById('contenedor-reporte-resultados').style.display = 'block';
-        const contenedor = document.getElementById('tabla-reporte-consolidado');
-        contenedor.innerHTML = `<div style="text-align:center; padding:20px;">⏳ Procesando movimientos...</div>`;
-
+        const i = document.getElementById('reporte-inicio').value; const f = document.getElementById('reporte-fin').value; if(!i || !f) return alert("Por favor, seleccione las fechas.");
+        let insumoFiltro = ""; if (esIndividual) { insumoFiltro = document.getElementById('reporte-insumo-select').value.trim().toLowerCase(); if (!insumoFiltro) return alert("Seleccione un insumo."); }
+        document.getElementById('contenedor-reporte-resultados').style.display = 'block'; const contenedor = document.getElementById('tabla-reporte-consolidado'); contenedor.innerHTML = `<div style="text-align:center; padding:20px;">⏳ Procesando...</div>`;
         try {
-            const resI = await fetch(`/api/insumos/ingresos?inicio=${i}&fin=${f}`);
-            const resC = await fetch(`/api/insumos/consumos?inicio=${i}&fin=${f}`);
-            if(!resI.ok || !resC.ok) throw new Error("Fallo");
-
-            const ing = await resI.json();
-            const cons = await resC.json();
-
-            let consolidados = {};
-            ing.forEach(m => {
-                if(!consolidados[m.insumoNombre]) consolidados[m.insumoNombre]={ing:0, egr:0};
-                consolidados[m.insumoNombre].ing += m.cantidad;
-            });
-            cons.forEach(m => {
-                if(!consolidados[m.insumoNombre]) consolidados[m.insumoNombre]={ing:0, egr:0};
-                consolidados[m.insumoNombre].egr += m.cantidad;
-            });
-
-            let reporteDatos = Object.keys(consolidados).map(n => {
-                let cat = "Otros";
-                let prodObj = Object.values(baseDeDatosProductos).find(p => p.nombre === n);
-                if(prodObj && prodObj.categoria) cat = prodObj.categoria;
-                return {producto: n, ingreso: parseFloat(consolidados[n].ing.toFixed(2)), egreso: parseFloat(consolidados[n].egr.toFixed(2)), categoria: cat};
-            });
-
-            if (esIndividual) {
-                reporteDatos = reporteDatos.filter(d => d.producto.toLowerCase() === insumoFiltro);
-            }
-
-            reporteDatos.sort((a,b) => a.producto.localeCompare(b.producto));
-            document.getElementById('titulo-tipo-reporte').innerText = esIndividual ? `Reporte de Movimientos: ${document.getElementById('reporte-insumo-select').value}` : "Reporte General de Movimientos";
-
+            const resI = await fetch(`/api/insumos/ingresos?inicio=${i}&fin=${f}`); const resC = await fetch(`/api/insumos/consumos?inicio=${i}&fin=${f}`); if(!resI.ok || !resC.ok) throw new Error("Fallo");
+            const ing = await resI.json(); const cons = await resC.json(); let consolidados = {};
+            ing.forEach(m => { if(!consolidados[m.insumoNombre]) consolidados[m.insumoNombre]={ing:0, egr:0}; consolidados[m.insumoNombre].ing += m.cantidad; });
+            cons.forEach(m => { if(!consolidados[m.insumoNombre]) consolidados[m.insumoNombre]={ing:0, egr:0}; consolidados[m.insumoNombre].egr += m.cantidad; });
+            let reporteDatos = Object.keys(consolidados).map(n => { let cat = "Otros"; let prodObj = Object.values(baseDeDatosProductos).find(p => p.nombre === n); if(prodObj && prodObj.categoria) cat = prodObj.categoria; return {producto: n, ingreso: parseFloat(consolidados[n].ing.toFixed(2)), egreso: parseFloat(consolidados[n].egr.toFixed(2)), categoria: cat}; });
+            if (esIndividual) reporteDatos = reporteDatos.filter(d => d.producto.toLowerCase() === insumoFiltro);
+            reporteDatos.sort((a,b) => a.producto.localeCompare(b.producto)); document.getElementById('titulo-tipo-reporte').innerText = esIndividual ? `Reporte: ${document.getElementById('reporte-insumo-select').value}` : "Reporte General";
             let htmlCompleto = "";
-            if(reporteDatos.length === 0) {
-                htmlCompleto = `<div style="text-align:center; padding:20px; color:#718096;">No hay movimientos registrados para esta búsqueda en las fechas indicadas.</div>`;
-            } else {
-                const categorias = ["Medicamentos", "Descartables", "Insumos de Alto Costo", "Otros"];
-                categorias.forEach(cat => {
+            if(reporteDatos.length === 0) { htmlCompleto = `<div style="text-align:center; padding:20px;">No hay movimientos.</div>`; } else {
+                ["Medicamentos", "Descartables", "Insumos de Alto Costo", "Otros"].forEach(cat => {
                     let filtradosCat = reporteDatos.filter(d => d.categoria === cat);
                     if(filtradosCat.length > 0) {
-                        htmlCompleto += `<h4 class="categoria-titulo">📁 ${cat}</h4>`;
-                        htmlCompleto += `<table><thead><tr style="background:#2b6cb0; color:white;"><th>Insumo / Producto</th><th style="text-align:center;">Total Ingreso</th><th style="text-align:center;">Total Egreso</th></tr></thead><tbody>`;
-                        filtradosCat.forEach(d => {
-                            htmlCompleto += `<tr>
-                                        <td><b>${d.producto}</b></td>
-                                        <td style="color:green; font-weight:bold; text-align:center;">+ ${d.ingreso}</td>
-                                        <td style="color:red; font-weight:bold; text-align:center;">- ${d.egreso}</td>
-                                     </tr>`;
-                        });
+                        htmlCompleto += `<h4 class="categoria-titulo">📁 ${cat}</h4><table><thead><tr style="background:#2b6cb0; color:white;"><th>Insumo / Producto</th><th style="text-align:center;">Total Ingreso</th><th style="text-align:center;">Total Egreso</th></tr></thead><tbody>`;
+                        filtradosCat.forEach(d => { htmlCompleto += `<tr><td><b>${d.producto}</b></td><td style="color:green; font-weight:bold; text-align:center;">+ ${d.ingreso}</td><td style="color:red; font-weight:bold; text-align:center;">- ${d.egreso}</td></tr>`; });
                         htmlCompleto += `</tbody></table>`;
                     }
                 });
             }
             contenedor.innerHTML = htmlCompleto;
-        } catch(e) {
-            contenedor.innerHTML = `<div style="text-align:center; color:red; padding:20px;">❌ Error al generar reporte. Verifique la conexión al servidor.</div>`;
-        }
+        } catch(e) { contenedor.innerHTML = `<div style="text-align:center; color:red; padding:20px;">❌ Error.</div>`; }
     }
 
-    // ==========================================
-    // 4. MÓDULO GASES
-    // ==========================================
-    const TIPOS_ESTANDAR_GASES = ["O2 - 10 m3", "O2 - 6.4 m3", "CO2 - 33 kg", "CO2 - 25 kg", "CO2 - 12.5 kg"];
-
-    async function cargarGases() {
+    async function generarReporteAuditoriaCompleto() {
+        const i = document.getElementById('reporte-inicio').value; const f = document.getElementById('reporte-fin').value; if(!i || !f) return alert("Por favor, seleccione las fechas.");
+        document.getElementById('contenedor-reporte-resultados').style.display = 'block'; const contenedor = document.getElementById('tabla-reporte-consolidado'); contenedor.innerHTML = `<div style="text-align:center; padding:20px;">⏳ Procesando...</div>`; document.getElementById('titulo-tipo-reporte').innerText = "Auditoría Completa por Usuario";
         try {
-            const res = await fetch('/api/gases'); const gases = await res.json();
-            estadoGases = {};
-            TIPOS_ESTANDAR_GASES.forEach(t => estadoGases[t] = { llenos: 0, vacios: 0 });
-
-            gases.forEach(g => {
-                if (TIPOS_ESTANDAR_GASES.includes(g.tipo)) {
-                    estadoGases[g.tipo] = { llenos: g.llenos, vacios: g.vacios };
-                }
-            });
-            actualizarEstadisticasGases(); actualizarSelectoresGas();
-        } catch(e){}
-    }
-
-    function actualizarSelectoresGas() {
-        let htmlIng = ""; let htmlCon = ""; let htmlAj = "";
-        TIPOS_ESTANDAR_GASES.forEach(t => {
-            const ll = estadoGases[t].llenos; const va = estadoGases[t].vacios;
-            htmlIng += `<option value="${t}">${t} (Vacíos para devolver: ${va})</option>`;
-            htmlCon += `<option value="${t}">${t} (Llenos disponibles: ${ll})</option>`;
-            htmlAj += `<option value="${t}">${t}</option>`;
-        });
-        if(document.getElementById('gas-ingreso-tipo')) document.getElementById('gas-ingreso-tipo').innerHTML = htmlIng;
-        if(document.getElementById('gas-consumo-tipo')) document.getElementById('gas-consumo-tipo').innerHTML = htmlCon;
-        if(document.getElementById('ajuste-gas-tipo')) document.getElementById('ajuste-gas-tipo').innerHTML = htmlAj;
-    }
-
-    function actualizarEstadisticasGases() {
-        const p = document.getElementById('panel-estado-gases-dinamico'); p.innerHTML = "";
-        let tO2L = 0; let tO2V = 0; let tCO2L = 0; let tCO2V = 0; let dH = "";
-
-        TIPOS_ESTANDAR_GASES.forEach(tipo => {
-            const d = estadoGases[tipo];
-            if (tipo.includes("CO2")) { tCO2L += d.llenos; tCO2V += d.vacios; } else if (tipo.includes("O2")) { tO2L += d.llenos; tO2V += d.vacios; }
-            if(d.llenos > 0 || d.vacios > 0) {
-                dH += `<div style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between;"><span>${tipo}</span> <b>Llenos: <span style="color:green;">${d.llenos}</span> | Vacíos: <span style="color:red;">${d.vacios}</span></b></div>`;
+            const resI = await fetch(`/api/insumos/ingresos?inicio=${i}&fin=${f}`); const resC = await fetch(`/api/insumos/consumos?inicio=${i}&fin=${f}`); if(!resI.ok || !resC.ok) throw new Error("Fallo");
+            const ing = await resI.json(); const cons = await resC.json(); let movimientos = [];
+            ing.forEach(m => { movimientos.push({ fecha: m.fechaIngreso, tipo: '🟢 INGRESO', insumo: m.insumoNombre, cantidad: `+ ${m.cantidad}`, usuario: m.usuario || 'Desconocido' }); });
+            cons.forEach(m => { movimientos.push({ fecha: m.fechaConsumo, tipo: '🔴 EGRESO', insumo: m.insumoNombre, cantidad: `- ${m.cantidad}`, usuario: m.usuario || 'Desconocido' }); });
+            movimientos.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+            let html = `<table><thead><tr style="background:#2d3748; color:white;"><th>Fecha</th><th>Tipo de Movimiento</th><th>Insumo / Producto</th><th style="text-align:center;">Cantidad</th><th>Usuario Responsable</th></tr></thead><tbody>`;
+            if(movimientos.length === 0) { html += `<tr><td colspan="5" style="text-align:center;">No hay movimientos.</td></tr>`; } else {
+                movimientos.forEach(m => { const colorCant = m.tipo.includes('INGRESO') ? 'green' : 'red'; html += `<tr><td><b>${m.fecha}</b></td><td><b>${m.tipo}</b></td><td>${m.insumo}</td><td style="color:${colorCant}; font-weight:bold; text-align:center; font-size:1.1em;">${m.cantidad}</td><td>👤 ${m.usuario}</td></tr>`; });
             }
-        });
-
-        let html = '<div class="grid-2-col" style="margin-bottom:20px;">';
-        html += `<div style="background:#fff; padding:20px; border-radius:12px; border:2px solid #e2e8f0;"><h2 style="margin:0 0 15px 0; color:#3182ce; text-align:center;">OXÍGENO (O2)</h2><h3 style="margin:0; text-align:center; color:#38a169;">🟢 Listos: ${tO2L}</h3><h3 style="margin:10px 0 20px 0; text-align:center; color:${tO2V>=5?'#e53e3e':'#4a5568'};">🔴 VACÍOS PARA PEDIR: ${tO2V}</h3><div style="background:#f7fafc; padding:10px; border-radius:8px; font-size:14px;">${dH.split('</div>').filter(x => !x.includes("CO2") && x.includes("O2")).join('</div>')}</div></div>`;
-        html += `<div style="background:#fff; padding:20px; border-radius:12px; border:2px solid #e2e8f0;"><h2 style="margin:0 0 15px 0; color:#4a5568; text-align:center;">CO2</h2><h3 style="margin:0; text-align:center; color:#38a169;">🟢 Listos: ${tCO2L}</h3><h3 style="margin:10px 0 20px 0; text-align:center; color:${tCO2V>=2?'#e53e3e':'#4a5568'};">🔴 VACÍOS PARA PEDIR: ${tCO2V}</h3><div style="background:#f7fafc; padding:10px; border-radius:8px; font-size:14px;">${dH.split('</div>').filter(x => x.includes("CO2")).join('</div>')}</div></div></div>`;
-        p.innerHTML = html;
-        document.getElementById('auditoria-tubos').innerHTML = `<div style="background:#fffaf0; padding:15px; border-radius:8px; border:1px solid #ed8936;"><h4 style="margin-top:0; color:#dd6b20;">⚠️ Auditoría Física (Parque)</h4><ul style="margin-bottom:0;"><li>Suma O2: <span style="font-weight:bold; color:${(tO2L+tO2V)!==11?'red':'green'};">${tO2L+tO2V}</span> (Deberían ser 11)</li><li>Suma CO2: <span style="font-weight:bold; color:${(tCO2L+tCO2V)!==4?'red':'green'};">${tCO2L+tCO2V}</span> (Deberían ser 4)</li></ul></div>`;
+            html += `</tbody></table>`; contenedor.innerHTML = html;
+        } catch(e) { contenedor.innerHTML = `<div style="text-align:center; color:red; padding:20px;">❌ Error.</div>`; }
     }
 
-    function agregarGasAlRemito() {
-        const t = document.getElementById('gas-ingreso-tipo').value; const ll = parseFloat(document.getElementById('gas-ingreso-llenos').value)||0; const va = parseFloat(document.getElementById('gas-ingreso-vacios').value)||0; const f = document.getElementById('gas-ingreso-fecha').value;
-        if(!f) return alert("Seleccione fecha."); if(ll===0 && va===0) return alert("Ingrese al menos un tubo.");
-        if (f > new Date().toISOString().split('T')[0]) return alert("❌ Fecha no puede ser futura.");
-
-        remitoGasTmp.push({tipo: t, llenos: ll, vacios: va, fecha: f});
-        dibujarRemitoGas();
-        document.getElementById('gas-ingreso-llenos').value = 0; document.getElementById('gas-ingreso-vacios').value = 0;
+    function descargarExcel(contenedorId, nombreArchivo) {
+        let tabla = document.querySelector(`#${contenedorId} table`); if (!tabla) return alert("No hay datos para exportar.");
+        let csv = []; let filas = tabla.querySelectorAll("tr");
+        for (let i = 0; i < filas.length; i++) { let fila = [], columnas = filas[i].querySelectorAll("td, th"); for (let j = 0; j < columnas.length; j++) { let texto = columnas[j].innerText.replace(/(\r\n|\n|\r)/gm, " ").replace(/"/g, '""'); fila.push('"' + texto + '"'); } csv.push(fila.join(",")); }
+        let csvFile = new Blob(["\uFEFF" + csv.join("\n")], {type: "text/csv;charset=utf-8;"}); let enlace = document.createElement("a"); enlace.download = `${nombreArchivo}_${new Date().toISOString().split('T')[0]}.csv`; enlace.href = window.URL.createObjectURL(csvFile); enlace.style.display = "none"; document.body.appendChild(enlace); enlace.click(); document.body.removeChild(enlace);
     }
 
-    function dibujarRemitoGas() {
-        const b = document.getElementById('tabla-remito-gas-body'); b.innerHTML = "";
-        remitoGasTmp.forEach((g,i) => { b.innerHTML += `<tr><td>${g.fecha}</td><td>${g.tipo}</td><td style="color:green; font-weight:bold;">+${g.llenos}</td><td style="color:red; font-weight:bold;">-${g.vacios}</td><td><button onclick="remitoGasTmp.splice(${i},1);dibujarRemitoGas()" class="btn-danger">X</button></td></tr>`; });
+    // EQUIPOS Y USUARIOS
+    function generarInformeEquipos() {
+        const contenedor = document.getElementById('informe-equipos-container');
+        let operativos = equiposDB.filter(e => e.estado === 'Operativo' && e.activo).length; let reparacion = equiposDB.filter(e => e.estado === 'En Reparación' && e.activo).length; let deposito = equiposDB.filter(e => e.estado === 'En Depósito' && e.activo).length;
+        let tablaDetalle = `<table id="tabla-exportar-equipos" style="margin-top: 20px;"><thead><tr style="background:#4a5568; color:white;"><th>Alias / Modelo</th><th>Tipo de Equipo</th><th>Número de Serie</th><th>Estado Actual</th></tr></thead><tbody>`; let hayEquipos = false;
+        equiposDB.forEach(e => { if(!e.activo) return; hayEquipos = true; let colorEstado = e.estado === 'Operativo' ? '#38a169' : (e.estado === 'En Reparación' ? '#e53e3e' : '#718096'); tablaDetalle += `<tr><td><b>${e.alias}</b></td><td>${e.tipo}</td><td>${e.serie}</td><td style="color:${colorEstado}; font-weight:bold;">${e.estado}</td></tr>`; });
+        if (!hayEquipos) tablaDetalle += `<tr><td colspan="4" style="text-align:center;">No hay equipos registrados.</td></tr>`; tablaDetalle += `</tbody></table>`;
+        let html = `<div style="background:#f7fafc; padding:20px; border-radius:8px; border:1px solid #e2e8f0;"><h4 style="margin-top:0; color:#2d3748; border-bottom:2px solid #cbd5e0; padding-bottom:10px;">Resumen Global de Parque Endoscópico</h4><div class="grid-3-col" style="text-align:center;"><div style="background:#f0fff4; padding:15px; border-radius:8px; border:1px solid #9ae6b4;"><h2 style="margin:0; color:#2f855a;">${operativos}</h2><span>🟢 Operativos</span></div><div style="background:#fff5f5; padding:15px; border-radius:8px; border:1px solid #feb2b2;"><h2 style="margin:0; color:#c53030;">${reparacion}</h2><span>🔴 En Reparación</span></div><div style="background:#edf2f7; padding:15px; border-radius:8px; border:1px solid #e2e8f0;"><h2 style="margin:0; color:#4a5568;">${deposito}</h2><span>📦 En Depósito</span></div></div><h4 style="margin-top:30px; color:#2b6cb0; border-bottom:1px solid #e2e8f0; padding-bottom:10px;">Listado Completo de Equipos</h4><div id="contenedor-tabla-equipos" class="table-responsive">${tablaDetalle}</div><div style="margin-top:25px; display:flex; gap:10px; flex-wrap:wrap;"><button class="btn-submit" style="background:#3182ce; width:auto; margin:0;" onclick="window.print()">🖨️ Imprimir Informe</button><button class="btn-submit" style="background:#38a169; width:auto; margin:0;" onclick="descargarExcel('contenedor-tabla-equipos', 'Reporte_Equipos_Clinica')">📥 Descargar a Excel</button><button class="btn-submit" style="background:#a0aec0; width:auto; margin:0;" onclick="document.getElementById('informe-equipos-container').style.display='none'">❌ Cerrar Informe</button></div></div>`;
+        contenedor.innerHTML = html; contenedor.style.display = 'block';
     }
-
-    async function confirmarIngresoGasMasivo() {
-        if(remitoGasTmp.length === 0) return alert("Lista vacía.");
-
-        let tLlenos = remitoGasTmp.reduce((acc, g) => acc + g.llenos, 0);
-        let tVacios = remitoGasTmp.reduce((acc, g) => acc + g.vacios, 0);
-
-        if (tLlenos > tVacios) {
-            if(!confirm(`⚠️ ADVERTENCIA DE PARQUE:\n\nLa cantidad de tubos RECIBIDOS (${tLlenos}) es MAYOR a los tubos ENTREGADOS (${tVacios}).\n\n¿Estás seguro de que deseas guardar este movimiento?`)) return;
-        }
-
-        for(let g of remitoGasTmp) await fetch(`/api/gases/ingreso?tipo=${encodeURIComponent(g.tipo)}&llenosRecibidos=${g.llenos}&vaciosEntregados=${g.vacios}&fecha=${g.fecha}`, {method:'POST'});
-        remitoGasTmp = []; dibujarRemitoGas(); document.getElementById('vista-form-gas-ingreso').style.display='none'; document.getElementById('vista-exito-gas-ingreso').style.display='block'; cargarGases();
-    }
-
-    function nuevoRegistroGasIngreso() { document.getElementById('vista-exito-gas-ingreso').style.display='none'; document.getElementById('vista-form-gas-ingreso').style.display='block'; }
-
-    async function registrarConsumoGas() {
-        const t = document.getElementById('gas-consumo-tipo').value; const c = parseFloat(document.getElementById('gas-consumo-cant').value); const f = document.getElementById('gas-consumo-fecha').value;
-        if(!f) return alert("Seleccione fecha.");
-        if (f > new Date().toISOString().split('T')[0]) return alert("❌ Fecha futura.");
-        if(c > (estadoGases[t]?estadoGases[t].llenos:0)) return alert("❌ No hay suficientes tubos llenos registrados para dar de baja.");
-        await fetch(`/api/gases/consumo?tipo=${encodeURIComponent(t)}&cantidad=${c}&fecha=${f}`, {method:'POST'});
-        alert("✔️ Baja de tubo registrada."); cargarGases();
-    }
-
-    async function forzarAjusteGas() {
-        const t = document.getElementById('ajuste-gas-tipo').value;
-        const ll = parseFloat(document.getElementById('ajuste-gas-llenos').value) || 0;
-        const va = parseFloat(document.getElementById('ajuste-gas-vacios').value) || 0;
-        if(confirm(`Confirmar ${ll} Llenos y ${va} Vacíos para ${t}?`)) {
-            await fetch(`/api/gases/ajustar?tipo=${encodeURIComponent(t)}&llenos=${ll}&vacios=${va}`, {method:'POST'});
-            alert("Corregido exitosamente.");
-            cargarGases();
-        }
-    }
-
-    async function generarReporteGases() {
-        const i = document.getElementById('analisis-gas-inicio').value; const f = document.getElementById('analisis-gas-fin').value;
-        if(!i||!f) return alert("Fechas obligatorias.");
-        const res = await fetch(`/api/gases/reporte?inicio=${i}&fin=${f}`); const consumosGas = await res.json();
-        const tbO2 = document.getElementById('tabla-reporte-o2-body'); const tbCO2 = document.getElementById('tabla-reporte-co2-body');
-        tbO2.innerHTML = ""; tbCO2.innerHTML = ""; let sO2t=0, sO2v=0, sCO2t=0, sCO2v=0;
-        let ag = {}; consumosGas.forEach(r => { if(!ag[r.tipo]) ag[r.tipo]=0; ag[r.tipo]+=r.cantidad; });
-        for(const t in ag) {
-            if (!TIPOS_ESTANDAR_GASES.includes(t)) continue;
-            const ext = t.match(/([\d.]+)\s*(m3|kg)/i); const val = ext ? (parseFloat(ext[1])*ag[t]) : 0;
-            const h = `<tr><td>${t}</td><td style="text-align:center; font-weight:bold;">${ag[t]}</td><td style="text-align:center; color:#2b6cb0; font-weight:bold;">${val.toFixed(2)} ${ext?ext[2]:''}</td></tr>`;
-            if(t.includes("CO2")) { tbCO2.innerHTML += h; sCO2t+=ag[t]; sCO2v+=val; } else { tbO2.innerHTML += h; sO2t+=ag[t]; sO2v+=val; }
-        }
-        tbO2.innerHTML += `<tr style="background:#ebf8ff; font-weight:bold;"><td>TOTAL O2:</td><td style="text-align:center; color:#c53030;">${sO2t}</td><td style="text-align:center; color:#2b6cb0;">${sO2v.toFixed(2)} m3</td></tr>`;
-        tbCO2.innerHTML += `<tr style="background:#f7fafc; font-weight:bold;"><td>TOTAL CO2:</td><td style="text-align:center; color:#c53030;">${sCO2t}</td><td style="text-align:center; color:#2b6cb0;">${sCO2v.toFixed(2)} kgs</td></tr>`;
-    }
-
-    // ==========================================
-    // 5. MÓDULO EQUIPOS Y USUARIOS
-    // ==========================================
+    async function mandarADeposito(id) { const m = prompt("Motivo para enviar a depósito:"); if(!m) return; await fetch(`/api/control/endoscopios/${id}/deposito?motivo=${encodeURIComponent(m)}`, {method:'POST'}); cargarEquipos().then(dibujarEquipos); }
     async function cargarEquipos() { try { const res = await fetch('/api/control/endoscopios'); equiposDB = await res.json(); const sG = document.getElementById('sel-gastro'); const sC = document.getElementById('sel-colono'); sG.innerHTML = "<option value=''>-- Seleccionar Gastro --</option>"; sC.innerHTML = "<option value=''>-- Seleccionar Colono --</option>"; const ops = equiposDB.filter(e => e.activo && e.estado === 'Operativo'); ops.filter(e => e.tipo === 'Gastroscopio').forEach(e => sG.innerHTML += `<option value="${e.id}">${e.alias} (SN: ${e.serie})</option>`); ops.filter(e => e.tipo === 'Colonoscopio').forEach(e => sC.innerHTML += `<option value="${e.id}">${e.alias} (SN: ${e.serie})</option>`); } catch (e) {} }
     async function funcionAltaEquipo() { const al = document.getElementById('eq-alias').value; const se = document.getElementById('eq-serie').value; const ti = document.getElementById('eq-tipo').value; if(!al || !se) return alert("Complete campos."); await fetch('/api/control/endoscopios', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({alias:al, serie:se, tipo:ti, activo:true, estado:"Operativo"})}); alert("¡Guardado!"); cargarEquipos(); mostrarSubCtrl('sub-form'); }
-    function dibujarEquipos() { let h = `<table><thead><tr style="background:#4a5568; color:white;"><th>Equipo</th><th>Tipo</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>`; equiposDB.forEach(e => { if(!e.activo) return; const isOp = e.estado === "Operativo"; const btnRep = isOp ? `<button onclick="mandarAReparar(${e.id})" class="btn-danger">Rotura</button>` : `<button onclick="volverAOperativo(${e.id})" class="btn-success">Alta</button>`; h += `<tr><td><b>${e.alias}</b> <small>SN:${e.serie}</small></td><td>${e.tipo}</td><td><b>${e.estado}</b></td><td>${btnRep} <button onclick="abrirFichaEquipo(${e.id})" class="btn-warning">Ficha</button> <button onclick="editarEndoscopio(${e.id}, '${e.alias}', '${e.serie}')" class="btn-info">Editar</button> <button onclick="eliminarEndoscopio(${e.id})" style="background:#718096; color:white; border:none; padding:8px 12px; border-radius:4px; font-size:12px; cursor:pointer;">Eliminar</button></td></tr>`; }); document.getElementById('lista-equipos').innerHTML = h + "</tbody></table>"; }
+    function dibujarEquipos() { let h = `<table><thead><tr style="background:#4a5568; color:white;"><th>Equipo</th><th>Tipo</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>`; equiposDB.forEach(e => { if(!e.activo) return; let botonesEstado = ""; if (e.estado === "Operativo") { botonesEstado = `<button onclick="mandarAReparar(${e.id})" class="btn-danger">Rotura</button> <button onclick="mandarADeposito(${e.id})" class="btn-warning" style="background:#718096; color:white;">Al Depósito</button>`; } else if (e.estado === "En Reparación" || e.estado === "En Depósito") { botonesEstado = `<button onclick="volverAOperativo(${e.id})" class="btn-success">Dar Alta</button>`; } else { botonesEstado = `<button onclick="volverAOperativo(${e.id})" class="btn-success">Alta</button>`; } h += `<tr><td><b>${e.alias}</b> <small>SN:${e.serie}</small></td><td>${e.tipo}</td><td><b>${e.estado}</b></td><td>${botonesEstado} <button onclick="abrirFichaEquipo(${e.id})" class="btn-info">Ficha</button> <button onclick="editarEndoscopio(${e.id}, '${e.alias}', '${e.serie}')" class="btn-info">Editar</button> <button onclick="eliminarEndoscopio(${e.id})" style="background:#718096; color:white; border:none; padding:8px 12px; border-radius:4px; font-size:12px; cursor:pointer;">Eliminar</button></td></tr>`; }); document.getElementById('lista-equipos').innerHTML = h + "</tbody></table>"; }
     async function editarEndoscopio(id, mAct, sAct) { const nm = prompt("Editar Modelo:", mAct); if(!nm) return; const ns = prompt("Editar Serie:", sAct); if(!ns) return; await fetch(`/api/control/endoscopios/editar/${id}?modelo=${encodeURIComponent(nm)}&serie=${encodeURIComponent(ns)}`, {method:'PUT'}); cargarEquipos().then(dibujarEquipos); }
     async function eliminarEndoscopio(id) { if(confirm("¿Eliminar equipo permanente?")) { await fetch(`/api/control/endoscopios/${id}`, {method:'DELETE'}); cargarEquipos().then(dibujarEquipos); } }
     async function mandarAReparar(id) { const m = prompt("Motivo:"); if(!m) return; await fetch(`/api/control/endoscopios/${id}/reparar?motivo=${encodeURIComponent(m)}`, {method:'POST'}); cargarEquipos().then(dibujarEquipos); }
     async function volverAOperativo(id) { await fetch(`/api/control/endoscopios/${id}/alta-reparacion`, {method:'POST'}); cargarEquipos().then(dibujarEquipos); }
-    async function abrirFichaEquipo(id) { const e = equiposDB.find(x=>x.id===id); document.getElementById('ficha-titulo').innerText = `${e.alias} (SN: ${e.serie})`; const ul = document.getElementById('ficha-reparaciones'); ul.innerHTML = ""; if(e.historialReparaciones && e.historialReparaciones.length>0) e.historialReparaciones.forEach(r => ul.innerHTML+=`<li>${r}</li>`); else ul.innerHTML="<li>Sin reparaciones</li>"; const tb = document.getElementById('ficha-controles-body'); document.getElementById('modal-ficha-equipo').style.display='flex'; try { const res = await fetch('/api/control-diario'); const data = await res.json(); let hc=""; let f=false; data.forEach(c => { let r=false; let obs=""; if(c.gastroId==id && (c.gastroLuz!=='ok'||c.gastroMov!=='ok'||c.gastroFuga!=='ok'||c.gastroCanal!=='ok'||(c.gastroObs&&c.gastroObs!==''))) { r=true; obs=`${c.gastroObs||'Falla detectada'}`; } if(c.colonoId==id && (c.colonoLuz!=='ok'||c.colonoMov!=='ok'||c.colonoFuga!=='ok'||c.colonoCanal!=='ok'||(c.colonoObs&&c.colonoObs!==''))) { r=true; obs=`${c.colonoObs||'Falla detectada'}`; } if(r) { f=true; hc+=`<tr><td>${new Date(c.fechaHora).toLocaleDateString()}</td><td>${c.usuarioResponsable}</td><td>${obs}</td></tr>`; } }); tb.innerHTML = f?hc:"<tr><td colspan='3' style='text-align:center;'>✅ Sin anomalías.</td></tr>"; } catch(e){} }
+
+    // FUNCION ACTUALIZADA PARA LA FICHA DEL EQUIPO
+    async function abrirFichaEquipo(id) {
+        equipoFichaActualId = id; // Guardamos el ID del equipo abierto para poder agregarle comentarios
+        const e = equiposDB.find(x=>x.id===id);
+        document.getElementById('ficha-titulo').innerText = `${e.alias} (SN: ${e.serie})`;
+        document.getElementById('nuevo-comentario-reparacion').value = ""; // Limpiamos el input
+
+        const ul = document.getElementById('ficha-reparaciones');
+        ul.innerHTML = "";
+        if(e.historialReparaciones && e.historialReparaciones.length>0) {
+            [...e.historialReparaciones].reverse().forEach(r => ul.innerHTML+=`<li style="margin-bottom: 5px;">${r}</li>`);
+        } else {
+            ul.innerHTML="<li>No hay registros de servicio técnico.</li>";
+        }
+
+        const tb = document.getElementById('ficha-controles-body');
+        document.getElementById('modal-ficha-equipo').style.display='flex';
+        try {
+            const res = await fetch('/api/control-diario');
+            const data = await res.json();
+            let hc=""; let f=false;
+            data.forEach(c => {
+                let r=false; let obs="";
+                if(c.gastroId==id && (c.gastroLuz!=='ok'||c.gastroMov!=='ok'||c.gastroFuga!=='ok'||c.gastroCanal!=='ok'||(c.gastroObs&&c.gastroObs!==''))) { r=true; obs=`${c.gastroObs||'Falla detectada'}`; }
+                if(c.colonoId==id && (c.colonoLuz!=='ok'||c.colonoMov!=='ok'||c.colonoFuga!=='ok'||c.colonoCanal!=='ok'||(c.colonoObs&&c.colonoObs!==''))) { r=true; obs=`${c.colonoObs||'Falla detectada'}`; }
+                if(r) { f=true; hc+=`<tr><td>${new Date(c.fechaHora).toLocaleDateString()}</td><td>${c.usuarioResponsable}</td><td>${obs}</td></tr>`; }
+            });
+            tb.innerHTML = f?hc:"<tr><td colspan='3' style='text-align:center;'>✅ Sin anomalías registradas en controles de sala.</td></tr>";
+        } catch(e){}
+    }
+
+    // NUEVA FUNCION PARA GUARDAR COMENTARIOS DEL SERVICIO TECNICO
+    async function guardarComentarioReparacion() {
+        if (!equipoFichaActualId) return;
+        const inputComentario = document.getElementById('nuevo-comentario-reparacion');
+        const texto = inputComentario.value.trim();
+
+        if (texto === "") return alert("⚠️ Debes escribir un comentario antes de guardar.");
+
+        try {
+            const res = await fetch(`/api/control/endoscopios/${equipoFichaActualId}/comentario-reparacion?comentario=${encodeURIComponent(texto)}`, { method: 'POST' });
+            if (res.ok) {
+                inputComentario.value = "";
+                await cargarEquipos(); // Recargamos la DB
+                abrirFichaEquipo(equipoFichaActualId); // Refrescamos la ventana modal
+            } else {
+                alert("❌ Error al guardar el comentario técnico.");
+            }
+        } catch (error) {
+            alert("🚨 Sin conexión con el servidor.");
+        }
+    }
 
     async function cargarUsuarios() { const res = await fetch('/api/usuarios'); const lista = await res.json(); const tb = document.getElementById('tabla-usuarios-body'); tb.innerHTML = ""; lista.forEach(u => { const a=u.activo!==false; const n=(u.nombreReal||"")+" "+(u.apellido||""); const e = a?`<button onclick="cambiarEstadoUsuario(${u.id})" class="btn-danger">Suspender</button>`:`<button onclick="cambiarEstadoUsuario(${u.id})" class="btn-success">Activar</button>`; const ed=`<button onclick="mostrarFormularioEdicionUsuario(${u.id},'${u.username}','${u.email||''}','${u.rol}','${u.nombreReal||''}','${u.apellido||''}','${u.dni||''}','${u.sexo||''}','${u.telefono||''}','${u.fechaNacimiento||''}','${u.pais||''}','${u.provincia||''}','${u.ciudad||''}','${u.direccion||''}')" class="btn-warning">✏️</button>`; tb.innerHTML+=`<tr><td>${n.trim()===""?u.username:n}</td><td>${u.username}</td><td>${u.rol}</td><td style="text-align:center;">${a?'🟢':'🔴'}</td><td>${ed} ${e}</td></tr>`; }); }
     async function cambiarEstadoUsuario(id) { await fetch(`/api/usuarios/${id}/estado`, {method:'POST'}); cargarUsuarios(); }
@@ -1493,6 +1177,189 @@
     function mostrarFormularioEdicionUsuario(id,user,em,rol,nom,ap,dni,sx,tel,nac,pa,pro,ciu,dir) { document.getElementById('vista-editar-usuario').style.display='block'; document.getElementById('edit-user-id').value=id; document.getElementById('edit-user-name').value=user; document.getElementById('edit-email').value=em; document.getElementById('edit-user-rol').value=rol; document.getElementById('edit-nombre').value=nom; document.getElementById('edit-apellido').value=ap; document.getElementById('edit-dni').value=dni; document.getElementById('edit-sexo').value=sx; document.getElementById('edit-telefono').value=tel; document.getElementById('edit-nacimiento').value=nac; document.getElementById('edit-pais').value=pa; document.getElementById('edit-provincia').value=pro; document.getElementById('edit-ciudad').value=ciu; document.getElementById('edit-direccion').value=dir; }
     function cancelarEdicionUsuario() { document.getElementById('vista-editar-usuario').style.display='none'; }
     async function guardarEdicionUsuario() { const id = document.getElementById('edit-user-id').value; const d = { username:document.getElementById('edit-user-name').value, email:document.getElementById('edit-email').value, rol:document.getElementById('edit-user-rol').value, nombreReal:document.getElementById('edit-nombre').value, apellido:document.getElementById('edit-apellido').value, dni:document.getElementById('edit-dni').value, sexo:document.getElementById('edit-sexo').value, telefono:document.getElementById('edit-telefono').value, fechaNacimiento:document.getElementById('edit-nacimiento').value, pais:document.getElementById('edit-pais').value, provincia:document.getElementById('edit-provincia').value, ciudad:document.getElementById('edit-ciudad').value, direccion:document.getElementById('edit-direccion').value }; await fetch(`/api/usuarios/editar/${id}`, {method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(d)}); cancelarEdicionUsuario(); cargarUsuarios(); }
+
+    // ==========================================
+    // 6. MÓDULO GASES MÉDICOS CON TUBOS GRÁFICOS
+    // ==========================================
+    function configurarTotalesGases() {
+        let nuevoO2 = prompt("¿Cuál es la cantidad TOTAL de tubos de Oxígeno (Llenos + Vacíos) en la clínica?", TOTAL_O2);
+        if(nuevoO2 && !isNaN(nuevoO2)) { TOTAL_O2 = parseInt(nuevoO2); localStorage.setItem('clinica_total_o2', TOTAL_O2); }
+
+        let nuevoCO2 = prompt("¿Cuál es la cantidad TOTAL de tubos de CO2 (Llenos + Vacíos) en la clínica?", TOTAL_CO2);
+        if(nuevoCO2 && !isNaN(nuevoCO2)) { TOTAL_CO2 = parseInt(nuevoCO2); localStorage.setItem('clinica_total_co2', TOTAL_CO2); }
+
+        actualizarTextosTotalesGases();
+    }
+
+    function actualizarTextosTotalesGases() {
+        const txt = document.getElementById('texto-alerta-totales');
+        if(txt) txt.innerText = `⚠️ Atención: La suma de tubos de Oxígeno siempre debe ser ${TOTAL_O2} y la de CO2 siempre debe ser ${TOTAL_CO2}.`;
+        const tituloO2 = document.getElementById('titulo-conteo-o2');
+        if(tituloO2) tituloO2.innerText = `OXÍGENO (O2) - [Total: ${TOTAL_O2}]`;
+        const tituloCO2 = document.getElementById('titulo-conteo-co2');
+        if(tituloCO2) tituloCO2.innerText = `DIÓXIDO DE CARBONO (CO2) - [Total: ${TOTAL_CO2}]`;
+    }
+
+    function actualizarGraficosGases(ultimoConteo) {
+        const wrapperO2 = document.getElementById('wrapper-chart-o2');
+        const wrapperCO2 = document.getElementById('wrapper-chart-co2');
+        if(!wrapperO2 || !wrapperCO2) return;
+
+        document.getElementById('info-ultimo-conteo').innerHTML = `<b>Fecha del control:</b> ${ultimoConteo.fecha} | <b>Registrado por:</b> 👤 ${ultimoConteo.usuario}`;
+
+        // CÁLCULO DE PORCENTAJES Y TEXTO
+        const totalO2Real = (ultimoConteo.o2Llenos || 0) + (ultimoConteo.o2Vacios || 0);
+        const pctO2 = totalO2Real > 0 ? Math.round((ultimoConteo.o2Vacios / totalO2Real) * 100) : 0;
+        document.getElementById('info-extra-o2').innerHTML = `<b>${ultimoConteo.o2Vacios} tubos vacíos</b> (${pctO2}%)`;
+
+        const totalCO2Real = (ultimoConteo.co2Llenos || 0) + (ultimoConteo.co2Vacios || 0);
+        const pctCO2 = totalCO2Real > 0 ? Math.round((ultimoConteo.co2Vacios / totalCO2Real) * 100) : 0;
+        document.getElementById('info-extra-co2').innerHTML = `<b>${ultimoConteo.co2Vacios} tubos vacíos</b> (${pctCO2}%)`;
+
+        // ALERTAS
+        const alertaO2 = document.getElementById('alerta-o2');
+        if (ultimoConteo.o2Vacios >= 3) { alertaO2.innerHTML = "⚠️ ¡CRÍTICO: PEDIR OXÍGENO!"; alertaO2.style.color = "#e53e3e"; }
+        else { alertaO2.innerHTML = "✔ Nivel Óptimo"; alertaO2.style.color = "#38a169"; }
+
+        const alertaCO2 = document.getElementById('alerta-co2');
+        if (ultimoConteo.co2Vacios >= 2) { alertaCO2.innerHTML = "⚠️ ¡CRÍTICO: PEDIR CO2!"; alertaCO2.style.color = "#e53e3e"; }
+        else { alertaCO2.innerHTML = "✔️ Nivel Óptimo"; alertaCO2.style.color = "#38a169"; }
+
+        // GENERAR DIBUJOS DE TUBOS O2
+        let htmlTubosO2 = "";
+        for(let i=0; i < (ultimoConteo.o2Llenos || 0); i++) { htmlTubosO2 += `<div class="tubo-gas tubo-lleno" title="O2 Lleno"></div>`; }
+        for(let i=0; i < (ultimoConteo.o2Vacios || 0); i++) { htmlTubosO2 += `<div class="tubo-gas tubo-vacio" title="O2 Vacío"></div>`; }
+        wrapperO2.innerHTML = htmlTubosO2;
+
+        // GENERAR DIBUJOS DE TUBOS CO2
+        let htmlTubosCO2 = "";
+        for(let i=0; i < (ultimoConteo.co2Llenos || 0); i++) { htmlTubosCO2 += `<div class="tubo-gas tubo-lleno" title="CO2 Lleno"></div>`; }
+        for(let i=0; i < (ultimoConteo.co2Vacios || 0); i++) { htmlTubosCO2 += `<div class="tubo-gas tubo-vacio" title="CO2 Vacío"></div>`; }
+        wrapperCO2.innerHTML = htmlTubosCO2;
+    }
+
+    async function cargarGases() {
+        try {
+            const resConteo = await fetch('/api/gases/conteo');
+            if(resConteo.ok) {
+                const conteos = await resConteo.json();
+                if(conteos.length > 0) {
+                    let ultimoConteoGas = conteos[conteos.length - 1];
+                    actualizarGraficosGases(ultimoConteoGas);
+
+                    let htmlHist = "";
+                    [...conteos].reverse().slice(0, 30).forEach(g => { htmlHist += `<tr><td>${g.fecha}</td><td>👤 ${g.usuario}</td><td>L: ${g.o2Llenos} | V: ${g.o2Vacios}</td><td>L: ${g.co2Llenos} | V: ${g.co2Vacios}</td></tr>`; });
+                    document.getElementById('tabla-tecnicas-historial-gases').innerHTML = htmlHist;
+                } else { document.getElementById('info-ultimo-conteo').innerHTML = "No hay controles registrados."; }
+            }
+            const resCompras = await fetch('/api/gases/compras'); if(resCompras.ok) { historialComprasGases = await resCompras.json(); dibujarHistorialComprasGases(); }
+            const resStockIni = await fetch('/api/gases/stock-inicial'); if(resStockIni.ok) { historialStockInicial = await resStockIni.json(); dibujarHistorialStockInicial(); }
+            const resHistorial = await fetch('/api/gases/consumo-historial'); if(resHistorial.ok) { historialConsumoGases = await resHistorial.json(); dibujarHistorialConsumosGases(); }
+        } catch(e) {}
+    }
+
+    async function guardarConteoGases() {
+        const fecha = document.getElementById('conteo-fecha-gas').value;
+        if(!fecha) return alert("Seleccione la fecha del control.");
+        const o2L = parseInt(document.getElementById('conteo-o2-llenos').value) || 0; const o2V = parseInt(document.getElementById('conteo-o2-vacios').value) || 0;
+        const co2L = parseInt(document.getElementById('conteo-co2-llenos').value) || 0; const co2V = parseInt(document.getElementById('conteo-co2-vacios').value) || 0;
+
+        if ((o2L + o2V) !== TOTAL_O2) return alert(`❌ ERROR DE CONTEO:\nLa suma de tubos de Oxígeno (Llenos + Vacíos) debe ser exactamente ${TOTAL_O2}.`);
+        if ((co2L + co2V) !== TOTAL_CO2) return alert(`❌ ERROR DE CONTEO:\nLa suma de tubos de CO2 (Llenos + Vacíos) debe ser exactamente ${TOTAL_CO2}.`);
+
+        const payload = { fecha: fecha, usuario: userActivo, o2Llenos: o2L, o2Vacios: o2V, co2Llenos: co2L, co2Vacios: co2V };
+        try {
+            await fetch('/api/gases/conteo', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+            alert("✔ Conteo Físico Guardado Exitosamente.");
+            document.getElementById('conteo-o2-llenos').value = "0"; document.getElementById('conteo-o2-vacios').value = "0";
+            document.getElementById('conteo-co2-llenos').value = "0"; document.getElementById('conteo-co2-vacios').value = "0";
+            document.getElementById('conteo-fecha-gas').value = "";
+            cargarGases(); await cargarHistorial();
+        } catch(e) { alert("Error al guardar conteo."); }
+    }
+
+    function agregarGasAlRemito() {
+        const t = document.getElementById('gas-ingreso-tipo').value; const vol = parseFloat(document.getElementById('gas-ingreso-volumen').value)||0; const precio = parseFloat(document.getElementById('gas-ingreso-precio').value)||0;
+        if(vol<=0) return alert("Ingrese un volumen comprado válido (mayor a 0).");
+        remitoGasTmp.push({tipo: t, volumen: vol, precio: precio});
+        let b = document.getElementById('tabla-remito-gas-body'); b.innerHTML = "";
+        remitoGasTmp.forEach((g,i) => { b.innerHTML += `<tr><td><b>${g.tipo}</b></td><td style="color:green; font-weight:bold;">+ ${g.volumen}</td><td style="color:#2b6cb0; font-weight:bold;">$ ${g.precio}</td><td><button onclick="remitoGasTmp.splice(${i},1); document.getElementById('tabla-remito-gas-body').innerHTML='';" class="btn-danger">X</button></td></tr>`; });
+        document.getElementById('gas-ingreso-volumen').value = "0"; document.getElementById('gas-ingreso-precio').value = "0";
+    }
+
+    async function confirmarIngresoGasMasivo() {
+        if(remitoGasTmp.length === 0) return alert("La lista de recepción está vacía.");
+        const f = document.getElementById('gas-fecha').value; const rem = document.getElementById('gas-remito').value; const fac = document.getElementById('gas-factura').value; const prov = document.getElementById('gas-proveedor').value;
+        if(!f) return alert("Por favor ingrese la fecha de compra.");
+        for(let g of remitoGasTmp) {
+            const payload = { fecha: f, remito: rem, factura: fac, proveedor: prov, gas: g.tipo, volumen: g.volumen, precio: g.precio, usuario: userActivo };
+            await fetch('/api/gases/compras', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+        }
+        remitoGasTmp = []; document.getElementById('tabla-remito-gas-body').innerHTML = "";
+        document.getElementById('gas-remito').value=""; document.getElementById('gas-factura').value=""; document.getElementById('gas-fecha').value="";
+        alert("✔️ Compras de Gas registradas exitosamente."); cargarGases();
+    }
+
+    function dibujarHistorialComprasGases() {
+        const tb = document.getElementById('tabla-historial-compras-gases'); if(!tb) return;
+        if(historialComprasGases.length === 0) { tb.innerHTML = "<p>No hay facturas registradas aún.</p>"; return; }
+        let html = `<table><thead><tr style="background:#2c7a7b; color:white;"><th>Fecha</th><th>Documento</th><th>Proveedor</th><th>Gas</th><th>Volumen</th><th>Precio</th><th>Usuario</th></tr></thead><tbody>`;
+        [...historialComprasGases].reverse().forEach(c => { html += `<tr><td>${c.fecha}</td><td>R:${c.remito||'-'} / F:${c.factura||'-'}</td><td>${c.proveedor||'-'}</td><td><b>${c.gas}</b></td><td style="color:green; font-weight:bold;">+ ${c.volumen}</td><td style="color:#2b6cb0; font-weight:bold;">$ ${c.precio}</td><td>👤 ${c.usuario}</td></tr>`; });
+        html += `</tbody></table>`; tb.innerHTML = html;
+    }
+
+    async function guardarStockInicialGas() {
+        const gas = document.getElementById('stock-ini-gas').value; const vol = parseFloat(document.getElementById('stock-ini-vol').value); const mes = document.getElementById('stock-ini-mes').value;
+        if(!mes) return alert("Seleccione el periodo (Mes/Año)."); if(isNaN(vol)) return alert("Ingrese un volumen inicial válido.");
+        const payload = { gas: gas, volumen: vol, mes: mes, usuario: userActivo };
+        try {
+            await fetch('/api/gases/stock-inicial', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+            alert(`✔️ Stock inicial de ${gas} guardado exitosamente para el periodo ${mes}.`);
+            document.getElementById('stock-ini-vol').value = "0"; cargarGases();
+        } catch (e) { alert("Error al guardar el Stock Inicial."); }
+    }
+
+    function dibujarHistorialStockInicial() {
+        const tb = document.getElementById('tabla-historial-stock-inicial'); if(!tb) return;
+        if(historialStockInicial.length === 0) { tb.innerHTML = "<p>No hay stocks registrados.</p>"; return; }
+        let html = `<ul style="margin:0; padding-left:20px;">`;
+        [...historialStockInicial].reverse().slice(0, 5).forEach(s => { html += `<li><b>${s.mes}</b> - ${s.gas}: ${s.volumen} (Por: ${s.usuario})</li>`; });
+        html += `</ul>`; tb.innerHTML = html;
+    }
+
+    function calcularConsumoPorDiferencia() {
+        const inicial = parseFloat(document.getElementById('calc-inicial').value) || 0; const compras = parseFloat(document.getElementById('calc-compras').value) || 0; const final = parseFloat(document.getElementById('calc-final').value) || 0; const gas = document.getElementById('calc-gas-tipo').value;
+        const consumo = (inicial + compras) - final;
+        const divResultado = document.getElementById('resultado-calculadora'); const txtResultado = document.getElementById('texto-resultado-consumo');
+        divResultado.style.display = 'block';
+        if (consumo < 0) { txtResultado.innerText = "Error: El Stock Final es mayor a lo disponible."; txtResultado.style.color = "#718096"; divResultado.style.borderColor = "#cbd5e0"; }
+        else { const unidad = gas === "O2" ? "m3" : "Kg"; txtResultado.innerText = consumo.toFixed(2) + " " + unidad; txtResultado.style.color = "#c53030"; divResultado.style.borderColor = "#fc8181"; }
+    }
+
+    async function calcularYGuardarConsumoGas() {
+        const gas = document.getElementById('calc-gas-tipo').value; const inicial = parseFloat(document.getElementById('calc-inicial').value) || 0; const compras = parseFloat(document.getElementById('calc-compras').value) || 0; const final = parseFloat(document.getElementById('calc-final').value) || 0; const mes = document.getElementById('calc-mes').value; const fechaMedicion = document.getElementById('calc-fecha-final').value;
+        if(!gas) return alert("Debe seleccionar un gas para el cálculo."); if(!mes || !fechaMedicion) return alert("Debe indicar el Mes a cerrar y la Fecha Exacta de la medición final.");
+        const consumo = (inicial + compras) - final;
+        if(consumo < 0) return alert("❌ Error matemático: El stock final no puede ser mayor a la suma del inicial y las compras.");
+        if(!confirm(`El consumo es de ${consumo.toFixed(2)} de ${gas}.\n\n¿Desea cerrar el periodo y guardar este consumo en el historial permanente?`)) return;
+        const payload = { mes: mes, fecha: fechaMedicion, usuario: userActivo, gas: gas, inicial: inicial, compras: compras, finalVol: final, consumo: consumo };
+        try {
+            await fetch('/api/gases/consumo-historial', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+            alert("✔️ Cierre guardado en el historial de forma exitosa.");
+            document.getElementById('calc-inicial').value = "0"; document.getElementById('calc-compras').value = "0"; document.getElementById('calc-final').value = "0";
+            cargarGases();
+        } catch(e) { alert("Error al guardar el historial."); }
+    }
+
+    function dibujarHistorialConsumosGases() {
+        const tb = document.getElementById('tabla-historial-gases'); if(!tb) return;
+        if(historialConsumoGases.length === 0) { tb.innerHTML = `<tr><td colspan="7" style="text-align:center;">No hay cierres históricos guardados aún.</td></tr>`; return; }
+        tb.innerHTML = "";
+        [...historialConsumoGases].reverse().forEach(h => {
+            tb.innerHTML += `<tr><td><b>${h.mes || '-'}</b><br><small style="color:#718096;">Medición: ${h.fecha}</small></td><td>👤 ${h.usuario}</td><td><b>${h.gas}</b></td><td style="text-align:center;">${h.inicial}</td><td style="text-align:center; color:#38a169;">+ ${h.compras}</td><td style="text-align:center; background:#edf2f7;">${h.finalVol}</td><td style="text-align:center; color:#c53030; font-weight:bold; font-size:1.1em;">- ${h.consumo.toFixed(2)}</td></tr>`;
+        });
+    }
+
 </script>
 </body>
 </html>

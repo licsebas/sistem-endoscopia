@@ -3,10 +3,12 @@ package com.instituto.endoscopia.controller;
 import com.instituto.endoscopia.model.Endoscopio;
 import com.instituto.endoscopia.repository.EndoscopioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/control/endoscopios")
@@ -53,6 +55,15 @@ public class EndoscopioController {
             endoscopioRepository.save(e);
         });
     }
+    // NUEVO: Enviar a depósito
+    @PostMapping("/{id}/deposito")
+    public void mandarADeposito(@PathVariable Long id, @RequestParam String motivo) {
+        endoscopioRepository.findById(id).ifPresent(eq -> {
+            eq.setEstado("En Depósito");
+            // Si tienes un campo para historial de movimientos, puedes agregar el motivo aquí
+            endoscopioRepository.save(eq);
+        });
+    }
 
     // ====================================================================
     // NUEVO MÉTODO: Permite editar los datos si cargaste mal la serie o el nombre
@@ -66,7 +77,23 @@ public class EndoscopioController {
             return endoscopioRepository.save(e);
         }).orElse(null);
     }
+    @PostMapping("/{id}/comentario-reparacion")
+    public ResponseEntity<?> agregarComentarioReparacion(@PathVariable Long id, @RequestParam String comentario) {
+        Optional<Endoscopio> optEndoscopio = endoscopioRepository.findById(id); // Usa tu repositorio/servicio
 
+        if (optEndoscopio.isPresent()) {
+            Endoscopio equipo = optEndoscopio.get();
+            String fechaActual = java.time.LocalDate.now().toString();
+            String notaTecnica = "📌 " + fechaActual + " - SERVICIO TÉCNICO: " + comentario;
+
+            // Agregamos la nueva nota a la lista existente de reparaciones
+            equipo.getHistorialReparaciones().add(notaTecnica);
+            endoscopioRepository.save(equipo);
+
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
 
 
 

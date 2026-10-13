@@ -19,6 +19,10 @@ public class Insumo {
     private String categoria;
 
     private Boolean activo = true;
+    // AGREGA ESTAS VARIABLES DEBAJO DE LAS QUE YA TIENES (ej. nombre, stock, etc.)
+    private Double precioActual = 0.0;
+    private Long proveedorId;
+    private String proveedorNombre;
 
     public Insumo() {
     }
@@ -47,6 +51,17 @@ public class Insumo {
 
     public String getCategoria() { return categoria; }
     public void setCategoria(String categoria) { this.categoria = categoria; }
+
+    // AGREGA ESTOS GETTERS Y SETTERS AL FINAL DEL ARCHIVO
+    public Double getPrecioActual() { return precioActual; }
+    public void setPrecioActual(Double precioActual) { this.precioActual = precioActual; }
+
+    public Long getProveedorId() { return proveedorId; }
+    public void setProveedorId(Long proveedorId) { this.proveedorId = proveedorId; }
+
+    public String getProveedorNombre() { return proveedorNombre; }
+    public void setProveedorNombre(String proveedorNombre) { this.proveedorNombre = proveedorNombre; }
+
 
     public Boolean getActivo() { return activo; }
     public void setActivo(Boolean activo) { this.activo = activo; }

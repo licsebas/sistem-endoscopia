@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+# Ignorar base de datos local y scripts de arranque
+data/
+*.mv.db
+*.bat
+

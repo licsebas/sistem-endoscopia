@@ -14,8 +14,12 @@ public class ConsumoInsumo {
     // CAMBIO: Ahora es Double
     private Double cantidad;
     private LocalDate fechaConsumo;
-
+    private Double precioUnitario; // El precio que tenía el insumo en ESE momento exacto
+    private Double costoTotal;     // El resultado de (cantidad * precioUnitario)
     public ConsumoInsumo() {}
+
+    private String usuario;
+
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -28,4 +32,13 @@ public class ConsumoInsumo {
 
     public LocalDate getFechaConsumo() { return fechaConsumo; }
     public void setFechaConsumo(LocalDate fechaConsumo) { this.fechaConsumo = fechaConsumo; }
+
+    public String getUsuario() { return usuario; }
+    public void setUsuario(String usuario) { this.usuario = usuario; }
+    public Double getPrecioUnitario() { return precioUnitario; }
+    public void setPrecioUnitario(Double precioUnitario) { this.precioUnitario = precioUnitario; }
+
+    public Double getCostoTotal() { return costoTotal; }
+    public void setCostoTotal(Double costoTotal) { this.costoTotal = costoTotal; }
+
 }

@@ -1,27 +1,28 @@
 package com.instituto.endoscopia.model;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import java.time.LocalDate;
+import jakarta.persistence.*;
 
 @Entity
 public class ConsumoGas {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String tipo;
-    private Double cantidad;
-    private LocalDate fecha;
+
+    private String mes; // NUEVO: Periodo al que corresponde (Ej: 2023-10)
+    private String fecha; // Fecha en que se midió el stock final
+    private String gas;
+    private Double inicial;
+    private Double compras;
+    private Double finalVol;
+    private Double consumo;
+    private String usuario;
 
     // Getters y Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getTipo() { return tipo; }
-    public void setTipo(String tipo) { this.tipo = tipo; }
-    public Double getCantidad() { return cantidad; }
-    public void setCantidad(Double cantidad) { this.cantidad = cantidad; }
-    public LocalDate getFecha() { return fecha; }
-    public void setFecha(LocalDate fecha) { this.fecha = fecha; }
+    public Long getId() { return id; } public void setId(Long id) { this.id = id; }
+    public String getMes() { return mes; } public void setMes(String mes) { this.mes = mes; } // NUEVO
+    public String getFecha() { return fecha; } public void setFecha(String fecha) { this.fecha = fecha; }
+    public String getGas() { return gas; } public void setGas(String gas) { this.gas = gas; }
+    public Double getInicial() { return inicial; } public void setInicial(Double inicial) { this.inicial = inicial; }
+    public Double getCompras() { return compras; } public void setCompras(Double compras) { this.compras = compras; }
+    public Double getFinalVol() { return finalVol; } public void setFinalVol(Double finalVol) { this.finalVol = finalVol; }
+    public Double getConsumo() { return consumo; } public void setConsumo(Double consumo) { this.consumo = consumo; }
+    public String getUsuario() { return usuario; } public void setUsuario(String usuario) { this.usuario = usuario; }
 }
